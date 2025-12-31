@@ -5,18 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>DersPlan v1 - Tema Seçenekli</title>
+    <title>Ders-Takip v1</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         
-        /* Tema Değişkenleri */
         :root {
             --primary: #4f46e5;
             --primary-light: rgba(79, 70, 229, 0.15);
             --sat: env(safe-area-inset-top, 0px);
             --sab: env(safe-area-inset-bottom, 0px);
-            
-            /* Varsayılan Koyu Tema (Görseldeki gibi) */
             --bg: #0f172a;
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
@@ -25,7 +22,6 @@
             --header-bg: rgba(15, 23, 42, 0.9);
         }
 
-        /* Açık Tema Değişkenleri */
         [data-theme="light"] {
             --bg: #f1f5f9;
             --text-main: #0f172a;
@@ -33,7 +29,6 @@
             --card: #ffffff;
             --border: #e2e8f0;
             --header-bg: rgba(241, 245, 249, 0.9);
-            --primary-light: rgba(79, 70, 229, 0.1);
         }
 
         * { 
@@ -57,7 +52,7 @@
         }
 
         .top-brand { height: 35px; display: flex; align-items: center; justify-content: center; }
-        .logo { font-weight: 800; font-size: 16px; color: var(--text-main); }
+        .logo { font-weight: 800; font-size: 16px; color: var(--text-main); text-transform: uppercase; letter-spacing: 2px; }
         .logo span { color: var(--primary); font-weight: 900; }
 
         .top-nav { display: flex; height: 40px; padding: 0 10px; gap: 6px; align-items: center; }
@@ -89,7 +84,6 @@
         .lbl-time { width: 85px; margin-right: 5px; }
         .lbl-class { width: 55px; margin-right: 5px; text-align: center; }
 
-        /* KART BOYUTLARI (8. SATIR İÇİN KOMPAKT) */
         .card {
             background: var(--card); border-radius: 10px; 
             padding: 7px 10px; margin-bottom: 4px; border: 1px solid var(--border);
@@ -110,7 +104,6 @@
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        /* TEMA SEÇİCİ */
         .theme-selector {
             display: flex; background: var(--bg); border: 1px solid var(--border);
             border-radius: 10px; padding: 3px; margin-bottom: 8px;
@@ -122,17 +115,27 @@
         }
         .theme-btn.active { background: var(--card); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
-        /* AYARLAR SAYFASI */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        input, select { height: 34px; font-size: 13px; border-radius: 6px; background: var(--bg); color: var(--text-main); border: 1px solid var(--border); padding: 0 6px; }
-        label { font-size: 9px; font-weight: 800; color: var(--text-sub); margin-bottom: 2px; }
-
-        .btn-action {
-            width: 100%; padding: 10px; border-radius: 10px; border: none;
-            background: var(--primary); color: white; font-weight: 800; font-size: 14px; margin-top: 10px;
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-item { display: flex; flex-direction: column; }
+        
+        input, select { 
+            height: 36px; font-size: 14px; border-radius: 8px; 
+            background: var(--bg); color: var(--text-main); 
+            border: 1px solid var(--border); padding: 0 10px; width: 100%;
         }
         
-        .settings-card { padding: 6px 10px !important; margin-bottom: 3px !important; }
+        label { 
+            font-size: 10px; font-weight: 800; color: var(--text-sub); 
+            margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .btn-action {
+            width: 100%; padding: 12px; border-radius: 10px; border: none;
+            background: var(--primary); color: white; font-weight: 800; font-size: 14px; margin-top: 10px;
+            cursor: pointer;
+        }
+        
+        .settings-card { padding: 10px 12px !important; margin-bottom: 5px !important; }
         .row-num { color: var(--primary); font-weight: 900; font-size: 11px; min-width: 50px; }
 
         .fade { animation: fadeIn 0.2s ease-out; }
@@ -141,7 +144,8 @@
 </head>
 <body data-theme="dark">
     <div class="header-container">
-        <header class="top-brand"><div class="logo">DERS<span>PLAN</span></div></header>
+        <!-- Türkçe isim odaklı logo -->
+        <header class="top-brand"><div class="logo">DERS-<span>TAKİP</span></div></header>
         <nav class="top-nav">
             <div class="nav-item active" id="btnHome" onclick="setPage('home')">
                 <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -166,31 +170,36 @@
     </main>
 
     <main id="pageSettings" class="hidden fade">
-        <!-- TEMA SEÇİCİ -->
         <div class="theme-selector">
-            <button class="theme-btn" id="tbtn-light" onclick="toggleTheme('light')">
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" stroke-width="2.5"/></svg>
-                AÇIK MOD
-            </button>
-            <button class="theme-btn active" id="tbtn-dark" onclick="toggleTheme('dark')">
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" stroke-width="2.5"/></svg>
-                KOYU MOD
-            </button>
+            <button class="theme-btn" id="tbtn-light" onclick="toggleTheme('light')">AÇIK MOD</button>
+            <button class="theme-btn active" id="tbtn-dark" onclick="toggleTheme('dark')">KOYU MOD</button>
         </div>
 
         <div class="card settings-card" style="border-color: #ef4444; background: rgba(239, 68, 68, 0.05);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-weight:800; font-size:12px; color:#ef4444;">DÜZENLEME KİLİDİ</span>
-                <button onclick="handleLock()" id="lockToggle" style="padding:4px 8px; border-radius:6px; background:#ef4444; color:white; border:none; font-size:10px; font-weight:800;">AÇ</button>
+                <button onclick="handleLock()" id="lockToggle" style="padding:4px 10px; border-radius:8px; background:#ef4444; color:white; border:none; font-size:11px; font-weight:800;">AÇ</button>
             </div>
         </div>
 
         <div class="card settings-card">
             <div class="grid-2">
-                <div><label>BAŞLANGIÇ</label><input type="time" id="cfgStart" disabled></div>
-                <div><label>DERS (DK)</label><input type="number" id="cfgDur" disabled></div>
-                <div><label>TENEFFÜS</label><input type="number" id="cfgBreak" disabled></div>
-                <div><label>ÖĞLE</label><input type="number" id="cfgLunch" disabled></div>
+                <div class="grid-item">
+                    <label>Başlangıç</label>
+                    <input type="time" id="cfgStart" disabled>
+                </div>
+                <div class="grid-item">
+                    <label>Ders (dk)</label>
+                    <input type="number" id="cfgDur" disabled placeholder="40">
+                </div>
+                <div class="grid-item">
+                    <label>Teneffüs (dk)</label>
+                    <input type="number" id="cfgBreak" disabled placeholder="10">
+                </div>
+                <div class="grid-item">
+                    <label>Öğle Arası (dk)</label>
+                    <input type="number" id="cfgLunch" disabled placeholder="45">
+                </div>
             </div>
         </div>
 
@@ -205,10 +214,10 @@
 
     <script>
         const lessons = {
-            "09": ["TÜRK DİLİ", "MATEMATİK", "İNGİLİZCE", "FİZİK", "KİMYA", "BİYOLOJİ", "TARİH", "COĞRAFYA", "ARAPÇA", "KURAN", "BEDEN", "SAĞLIK", "REHBERLİK", "DİN"],
-            "10": ["TÜRK DİLİ", "MATEMATİK", "İNGİLİZCE", "FİZİK", "KİMYA", "BİYOLOJİ", "TARİH", "COĞRAFYA", "FELSEFE", "HADİS", "FIKIH", "SİYER", "ARAPÇA", "KURAN", "BEDEN"],
-            "11": ["TÜRK DİLİ", "MATEMATİK", "İNGİLİZCE", "TARİH", "COĞRAFYA", "FELSEFE", "TEFSİR", "AKAİD", "HİTABET", "M. ARAPÇA", "KURAN", "SEÇMELİ", "BEDEN"],
-            "12": ["TÜRK DİLİ", "MATEMATİK", "İNGİLİZCE", "İNKILAP", "COĞRAFYA", "DİNLER T.", "KELAM", "M. ARAPÇA", "İSLAM K.", "KURAN", "REHBERLİK", "SEÇMELİ"]
+            "09": ["TÜRK DİLİ VE EDEBİYATI", "MATEMATİK", "İNGİLİZCE", "FİZİK", "KİMYA", "BİYOLOJİ", "TARİH", "COĞRAFYA", "ARAPÇA", "KURAN-I KERİM", "BEDEN EĞİTİMİ", "SAĞLIK BİLGİSİ", "REHBERLİK", "TEMEL DİNİ BİLGİLER"],
+            "10": ["TÜRK DİLİ VE EDEBİYATI", "MATEMATİK", "İNGİLİZCE", "FİZİK", "KİMYA", "BİYOLOJİ", "TARİH", "COĞRAFYA", "FELSEFE", "HADİS", "FIKIH", "SİYER", "ARAPÇA", "KURAN-I KERİM", "BEDEN EĞİTİMİ"],
+            "11": ["TÜRK DİLİ VE EDEBİYATI", "MATEMATİK", "İNGİLİZCE", "TARİH", "COĞRAFYA", "FELSEFE", "TEFSİR", "AKAİD", "HİTABET", "MESLEKİ ARAPÇA", "KURAN-I KERİM", "SEÇMELİ DERS", "BEDEN EĞİTİMİ"],
+            "12": ["TÜRK DİLİ VE EDEBİYATI", "MATEMATİK", "İNGİLİZCE", "T.C. İNKILAP TARİHİ", "COĞRAFYA", "DİNLER TARİHİ", "KELAM", "MESLEKİ ARAPÇA", "İSLAM KÜLTÜR VE MEDENİYETİ", "KURAN-I KERİM", "REHBERLİK", "SEÇMELİ DERS"]
         };
         const classSubs = {
             "09": ["A", "B", "C", "D", "E", "I", "J"], "10": ["A", "B", "C", "D", "I", "J"],
@@ -264,11 +273,10 @@
             const list = document.getElementById('scheduleList');
             const dayData = db.schedule.filter(s => s.day === currentActiveDay).sort((a,b) => a.idx - b.idx);
             const times = getTimes();
-            
             document.querySelectorAll('.day-tab').forEach(t => t.classList.toggle('active', t.innerText === currentActiveDay));
 
             if(dayData.length === 0) {
-                list.innerHTML = `<div class="card" style="text-align:center; color:var(--text-sub); font-size:12px;">Ayarlar'dan programı doldurun.</div>`;
+                list.innerHTML = `<div class="card" style="text-align:center; color:var(--text-sub); font-size:12px;">Ayarlar sekmesinden programı doldurunuz.</div>`;
                 return;
             }
 
@@ -321,11 +329,14 @@
             const l = document.getElementById(`lvl-${i}`).value;
             const s = document.getElementById(`sub-${i}`);
             const e = document.getElementById(`les-${i}`);
+            const prevSub = s.value;
+            const prevLes = e.value;
             s.innerHTML = '<option value="">Şube</option>';
             e.innerHTML = '<option value="">Ders</option>';
             if(l) {
                 classSubs[l].forEach(x => s.innerHTML += `<option value="${x}">${x}</option>`);
                 lessons[l].forEach(x => e.innerHTML += `<option value="${x}">${x}</option>`);
+                s.value = prevSub; e.value = prevLes;
             }
         }
 
