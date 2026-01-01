@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -22,6 +21,7 @@
             --card: #1e293b;
             --border: #334155;
             --header-bg: rgba(15, 23, 42, 0.9);
+            --font-scale: 1;
         }
 
         [data-theme="light"] {
@@ -36,7 +36,6 @@
         * { 
             -webkit-tap-highlight-color: transparent; 
             box-sizing: border-box; 
-            touch-action: pan-y; /* Sağa sola kaydırma JS ile yönetilecek, dikey kaydırma serbest */
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
         
@@ -55,19 +54,24 @@
         }
 
         .top-brand { height: 35px; display: flex; align-items: center; justify-content: center; }
-        .logo { font-weight: 800; font-size: 16px; color: var(--text-main); text-transform: uppercase; letter-spacing: 2px; }
+        .logo { font-weight: 800; font-size: calc(16px * var(--font-scale)); color: var(--text-main); text-transform: uppercase; letter-spacing: 2px; }
         .logo span { color: var(--primary); font-weight: 900; }
 
         .top-nav { display: flex; height: 40px; padding: 0 10px; gap: 6px; align-items: center; }
         .nav-item {
             flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px;
             height: 30px; border-radius: 8px; color: var(--text-sub); cursor: pointer;
-            font-size: 11px; font-weight: 800;
+            font-size: calc(11px * var(--font-scale)); font-weight: 800;
         }
         .nav-item.active { background: var(--primary); color: white; }
         .nav-icon { width: 14px; height: 14px; stroke-width: 2.5; }
 
-        main { padding: 4px 8px; width: 100%; max-width: 500px; margin: 0 auto; position: relative; }
+        /* Main alanı swipe için geliştirildi */
+        main { 
+            padding: 4px 8px; width: 100%; max-width: 500px; margin: 0 auto; 
+            position: relative; min-height: 70vh;
+            touch-action: pan-y; /* Yatayda JS, dikeyde tarayıcı yönetir */
+        }
         .hidden { display: none !important; }
 
         .day-bar { display: flex; gap: 5px; overflow-x: auto; padding: 4px 12px 8px 12px; scrollbar-width: none; }
@@ -75,14 +79,14 @@
         
         .day-tab {
             padding: 6px 12px; border-radius: 8px; background: var(--card); border: 1px solid var(--border);
-            font-size: 12px; font-weight: 700; color: var(--text-sub); flex-shrink: 0;
+            font-size: calc(12px * var(--font-scale)); font-weight: 700; color: var(--text-sub); flex-shrink: 0;
             transition: all 0.2s;
         }
         .day-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
 
         .list-labels {
             display: flex; align-items: center; padding: 0 10px 4px 10px;
-            font-size: 10px; font-weight: 800; color: var(--text-sub); opacity: 0.7;
+            font-size: calc(10px * var(--font-scale)); font-weight: 800; color: var(--text-sub); opacity: 0.7;
         }
         .lbl-idx { width: 22px; margin-right: 5px; }
         .lbl-time { width: 85px; margin-right: 5px; }
@@ -94,19 +98,18 @@
         }
         .lesson-row { display: flex; align-items: center; gap: 6px; }
 
-        .item-idx { color: var(--primary); width: 22px; font-size: 15px; font-weight: 900; }
-        .item-time { color: var(--text-sub); width: 85px; font-size: 12px; font-weight: 700; }
+        .item-idx { color: var(--primary); width: 22px; font-size: calc(15px * var(--font-scale)); font-weight: 900; }
+        .item-time { color: var(--text-sub); width: 85px; font-size: calc(12px * var(--font-scale)); font-weight: 700; }
         .item-class { 
-            background: var(--primary);
-            color: #ffffff;
+            background: var(--primary); color: #ffffff;
             padding: 3px 5px; border-radius: 6px; width: 55px; 
-            text-align: center; font-size: 11px; font-weight: 900;
+            text-align: center; font-size: calc(11px * var(--font-scale)); font-weight: 900;
             border: 1px solid var(--primary);
         }
-        .item-class.empty-val { background: transparent; color: transparent; }
+        .item-class.empty-val { background: transparent; border-color: transparent; }
         .item-title { 
             text-transform: uppercase; flex: 1; 
-            color: var(--text-main); font-size: 14px; font-weight: 800; line-height: 1.1;
+            color: var(--text-main); font-size: calc(14px * var(--font-scale)); font-weight: 800; line-height: 1.1;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
@@ -125,52 +128,32 @@
         .grid-item { display: flex; flex-direction: column; }
         
         input, select { 
-            height: 36px; font-size: 14px; border-radius: 8px; 
+            height: 36px; font-size: calc(14px * var(--font-scale)); border-radius: 8px; 
             background: var(--bg); color: var(--text-main); 
             border: 1px solid var(--border); padding: 0 10px; width: 100%;
         }
         
         label { 
-            font-size: 10px; font-weight: 800; color: var(--text-sub); 
+            font-size: calc(10px * var(--font-scale)); font-weight: 800; color: var(--text-sub); 
             margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;
         }
 
         .btn-action {
             width: 100%; padding: 12px; border-radius: 10px; border: none;
-            background: var(--primary); color: white; font-weight: 800; font-size: 14px; margin-top: 10px;
+            background: var(--primary); color: white; font-weight: 800; font-size: calc(14px * var(--font-scale)); margin-top: 10px;
             cursor: pointer;
         }
         
         .settings-card { padding: 10px 12px !important; margin-bottom: 5px !important; }
-        .row-num { color: var(--primary); font-weight: 900; font-size: 11px; min-width: 50px; }
+        .row-num { color: var(--primary); font-weight: 900; font-size: calc(11px * var(--font-scale)); min-width: 50px; }
 
-        /* Kaydırma animasyonları için */
-        .fade { animation: fadeIn 0.2s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Geçiş efekti */
-        .slide-left { animation: slideLeft 0.2s ease-out; }
-        .slide-right { animation: slideRight 0.2s ease-out; }
-        @keyframes slideLeft { from { transform: translateX(20px); opacity: 0.5; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideRight { from { transform: translateX(-20px); opacity: 0.5; } to { transform: translateX(0); opacity: 1; } }
-    
-        /* Yazı boyutu ölçekleme (Ayarlar -> Açılır Menü) */
-        :root { --font-scale: 1; }
-
-        .logo { font-size: calc(16px * var(--font-scale)); }
-        .nav-item { font-size: calc(11px * var(--font-scale)); }
-        .day-tab { font-size: calc(12px * var(--font-scale)); }
-        .list-labels { font-size: calc(10px * var(--font-scale)); }
-
-        .item-idx { font-size: calc(15px * var(--font-scale)); }
-        .item-time { font-size: calc(12px * var(--font-scale)); }
-        .item-class { font-size: calc(11px * var(--font-scale)); }
-        .item-title { font-size: calc(14px * var(--font-scale)); }
-
-        label { font-size: calc(10px * var(--font-scale)); }
-        input, select { font-size: calc(14px * var(--font-scale)); }
-        .btn-action { font-size: calc(14px * var(--font-scale)); }
-        .row-num { font-size: calc(11px * var(--font-scale)); }
+        /* Animasyonlar */
+        .slide-left { animation: slideLeft 0.25s ease-out; }
+        .slide-right { animation: slideRight 0.25s ease-out; }
+        @keyframes slideLeft { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideRight { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .fade { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
     </style>
 </head>
@@ -197,7 +180,7 @@
             <div class="lbl-class">SINIF</div>
             <div>DERS</div>
         </div>
-        <div id="scheduleList" class="fade"></div>
+        <div id="scheduleList"></div>
     </main>
 
     <main id="pageSettings" class="hidden fade">
@@ -206,17 +189,17 @@
             <button class="theme-btn active" id="tbtn-dark" onclick="toggleTheme('dark')">KOYU MOD</button>
         </div>
 
-        
-
         <div class="card settings-card">
             <label>YAZI BOYUTU</label>
             <select id="fontSizeSel" onchange="setFontScale(this.value)">
                 <option value="0.7">Küçük</option>
                 <option value="0.8">Normal</option>
                 <option value="0.9">Büyük</option>
+                <option value="1" selected>X Büyük</option>
             </select>
         </div>
-<div class="card settings-card" style="border-color: #ef4444; background: rgba(239, 68, 68, 0.05);">
+
+        <div class="card settings-card" style="border-color: #ef4444; background: rgba(239, 68, 68, 0.05);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-weight:800; font-size:12px; color:#ef4444;">DÜZENLEME KİLİDİ</span>
                 <button onclick="handleLock()" id="lockToggle" style="padding:4px 10px; border-radius:8px; background:#ef4444; color:white; border:none; font-size:11px; font-weight:800;">AÇ</button>
@@ -274,36 +257,43 @@
         let currentActiveDay = gunList[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
         let isLocked = true;
 
-        // --- SWIPE (KAYDIRMA) MANTIĞI ---
+        // --- GELİŞTİRİLMİŞ SWIPE MANTIĞI ---
         let touchStartX = 0;
-        let touchEndX = 0;
+        let touchStartY = 0;
 
-        function handleGesture() {
-            const threshold = 70; // Kaydırma hassasiyeti
-            const currentIndex = gunList.indexOf(currentActiveDay);
-            const lastIndex = gunList.length - 1;
+        function handleGesture(endX, endY) {
+            const xDiff = touchStartX - endX;
+            const yDiff = touchStartY - endY;
+            const threshold = 60; // Yatay kaydırma hassasiyeti
 
-            if (touchEndX < touchStartX - threshold) {
-                // Sola kaydırdı -> Sonraki gün (döngüsel: Pazar -> Pazartesi)
-                const nextIndex = (currentIndex === lastIndex) ? 0 : currentIndex + 1;
-                changeDay(gunList[nextIndex], 'left');
-            }
-            if (touchEndX > touchStartX + threshold) {
-                // Sağa kaydırdı -> Önceki gün (döngüsel: Pazartesi -> Pazar)
-                const prevIndex = (currentIndex === 0) ? lastIndex : currentIndex - 1;
-                changeDay(gunList[prevIndex], 'right');
+            // Yatay kaydırmanın dikeyden daha baskın olduğunu kontrol et (yanlışlıkla aşağı kaydırırken gün değişmesin)
+            if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > threshold) {
+                const currentIndex = gunList.indexOf(currentActiveDay);
+                if (xDiff > 0) {
+                    // Sola kaydırma -> Sonraki gün
+                    const next = (currentIndex === gunList.length - 1) ? 0 : currentIndex + 1;
+                    changeDay(gunList[next], 'left');
+                } else {
+                    // Sağa kaydırma -> Önceki gün
+                    const prev = (currentIndex === 0) ? gunList.length - 1 : currentIndex - 1;
+                    changeDay(gunList[prev], 'right');
+                }
             }
         }
 
         function changeDay(newDay, direction) {
+            if (currentActiveDay === newDay) return;
             currentActiveDay = newDay;
             const list = document.getElementById('scheduleList');
-            list.classList.remove('slide-left', 'slide-right', 'fade');
-            void list.offsetWidth; // DOM'u tetikle
-            list.classList.add(direction === 'left' ? 'slide-left' : 'slide-right');
-            renderHome();
             
-            // Seçili günü bar üzerinde görünebilir yap
+            // Animasyon ekle
+            list.classList.remove('slide-left', 'slide-right');
+            void list.offsetWidth; 
+            list.classList.add(direction === 'left' ? 'slide-left' : 'slide-right');
+            
+            renderHome();
+
+            // Day bar tab'ını merkeze getir
             const activeTab = document.querySelector('.day-tab.active');
             if(activeTab) activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         }
@@ -316,17 +306,12 @@
             localStorage.setItem('dersPlan_v1', JSON.stringify(db));
         }
 
-        
-
-        // Yazı boyutu (font scale) - Ayarlar menüsünden seçilir ve kaydedilir
         function setFontScale(val) {
-            const v = String(val);
-            document.documentElement.style.setProperty('--font-scale', v);
-            localStorage.setItem('fontScale', v);
-            const sel = document.getElementById('fontSizeSel');
-            if (sel && sel.value !== v) sel.value = v;
+            document.documentElement.style.setProperty('--font-scale', val);
+            localStorage.setItem('fontScale', val);
         }
-function getTimes() {
+
+        function getTimes() {
             let res = []; let time = db.config.start;
             for(let i=0; i<8; i++) {
                 res.push(time);
@@ -352,9 +337,6 @@ function getTimes() {
             isLocked = !isLocked;
             document.getElementById('lockToggle').innerText = isLocked ? "AÇ" : "KİLİTLE";
             document.querySelectorAll('#pageSettings input, #pageSettings select:not(#fontSizeSel), #btnSave').forEach(el => el.disabled = isLocked);
-            // Yazı boyutu menüsü kilitten bağımsız kalsın
-            const fsel = document.getElementById('fontSizeSel');
-            if(fsel) fsel.disabled = false;
         }
 
         function renderHome() {
@@ -364,7 +346,7 @@ function getTimes() {
             document.querySelectorAll('.day-tab').forEach(t => t.classList.toggle('active', t.innerText === currentActiveDay));
 
             if(dayData.length === 0) {
-                list.innerHTML = `<div class="card" style="text-align:center; color:var(--text-sub); font-size:12px; padding:30px 10px;">Henüz program girilmemiş.<br>Ayarlar sekmesinden bu gün için ders ekleyin.</div>`;
+                list.innerHTML = `<div class="card" style="text-align:center; color:var(--text-sub); font-size:12px; padding:40px 10px;">Henüz program girilmemiş.<br>Ayarlar sekmesinden bu gün için ders ekleyin.</div>`;
                 return;
             }
 
@@ -447,11 +429,12 @@ function getTimes() {
         }
 
         window.onload = () => {
-            
-            // Kaydedilmiş yazı boyutunu uygula
             const savedFS = localStorage.getItem('fontScale') || "1";
             setFontScale(savedFS);
-toggleTheme(db.config.theme || "dark");
+            if(document.getElementById('fontSizeSel')) document.getElementById('fontSizeSel').value = savedFS;
+
+            toggleTheme(db.config.theme || "dark");
+            
             const bar = document.getElementById('dayBar');
             const bulk = document.getElementById('bulkDay');
             gunList.forEach(d => {
@@ -466,21 +449,24 @@ toggleTheme(db.config.theme || "dark");
                 bar.appendChild(btn);
                 bulk.innerHTML += `<option>${d}</option>`;
             });
+
             document.getElementById('cfgStart').value = db.config.start;
             document.getElementById('cfgDur').value = db.config.duration;
             document.getElementById('cfgBreak').value = db.config.break;
             document.getElementById('cfgLunch').value = db.config.lunch;
+            
             renderHome();
 
-            // Swipe Olay Dinleyicileri (Sadece Home sayfasında çalışması için)
-            const homePage = document.getElementById('pageHome');
-            homePage.addEventListener('touchstart', e => {
+            // --- TÜM SAYFAYI KAPSAYAN SWIPE EVENTLERİ ---
+            const mainPage = document.getElementById('pageHome');
+            
+            mainPage.addEventListener('touchstart', e => {
                 touchStartX = e.changedTouches[0].screenX;
+                touchStartY = e.changedTouches[0].screenY;
             }, {passive: true});
 
-            homePage.addEventListener('touchend', e => {
-                touchEndX = e.changedTouches[0].screenX;
-                handleGesture();
+            mainPage.addEventListener('touchend', e => {
+                handleGesture(e.changedTouches[0].screenX, e.changedTouches[0].screenY);
             }, {passive: true});
         };
     </script>
