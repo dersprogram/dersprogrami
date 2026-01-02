@@ -1,474 +1,79 @@
+<!-- aver2.html -->
 
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Ders-Takip v1</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DERS-TAKİP</title>
+
+    <!-- FONT -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        
-        :root {
-            --primary: #4f46e5;
-            --primary-light: rgba(79, 70, 229, 0.15);
-            --sat: env(safe-area-inset-top, 0px);
-            --sab: env(safe-area-inset-bottom, 0px);
-            --bg: #0f172a;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-            --card: #1e293b;
-            --border: #334155;
-            --header-bg: rgba(15, 23, 42, 0.9);
-            --font-scale: 1;
-        }
-
-        [data-theme="light"] {
-            --bg: #f1f5f9;
-            --text-main: #0f172a;
-            --text-sub: #64748b;
-            --card: #ffffff;
-            --border: #e2e8f0;
-            --header-bg: rgba(241, 245, 249, 0.9);
-        }
-
-        * { 
-            -webkit-tap-highlight-color: transparent; 
-            box-sizing: border-box; 
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-        }
-        
+        /* ===== TEMEL STİLLER ===== */
         body {
-            background-color: var(--bg); font-family: 'Inter', sans-serif; margin: 0; color: var(--text-main);
-            padding-top: calc(95px + var(--sat)); padding-bottom: calc(10px + var(--sab));
-            overflow-x: hidden;
-            width: 100vw;
-        }
-
-        .header-container {
-            position: fixed; top: 0; left: 0; right: 0;
-            background: var(--header-bg); z-index: 1000;
-            border-bottom: 1px solid var(--border); padding-top: var(--sat);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-        }
-
-        .top-brand { height: 35px; display: flex; align-items: center; justify-content: center; }
-        .logo { font-weight: 800; font-size: calc(16px * var(--font-scale)); color: var(--text-main); text-transform: uppercase; letter-spacing: 2px; }
-        .logo span { color: var(--primary); font-weight: 900; }
-
-        .top-nav { display: flex; height: 40px; padding: 0 10px; gap: 6px; align-items: center; }
-        .nav-item {
-            flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px;
-            height: 30px; border-radius: 8px; color: var(--text-sub); cursor: pointer;
-            font-size: calc(11px * var(--font-scale)); font-weight: 800;
-        }
-        .nav-item.active { background: var(--primary); color: white; }
-        .nav-icon { width: 14px; height: 14px; stroke-width: 2.5; }
-
-        /* Main alanı swipe için geliştirildi */
-        main { 
-            padding: 4px 8px; width: 100%; max-width: 500px; margin: 0 auto; 
-            position: relative; min-height: 70vh;
-            touch-action: pan-y; /* Yatayda JS, dikeyde tarayıcı yönetir */
+            margin: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(180deg, #0b1220, #0a1020);
+            color: #fff;
         }
         .hidden { display: none !important; }
-
-        .day-bar { display: flex; gap: 5px; overflow-x: auto; padding: 4px 12px 8px 12px; scrollbar-width: none; }
-        .day-bar::-webkit-scrollbar { display: none; }
-        
-        .day-tab {
-            padding: 6px 12px; border-radius: 8px; background: var(--card); border: 1px solid var(--border);
-            font-size: calc(12px * var(--font-scale)); font-weight: 700; color: var(--text-sub); flex-shrink: 0;
-            transition: all 0.2s;
-        }
-        .day-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-        .list-labels {
-            display: flex; align-items: center; padding: 0 10px 4px 10px;
-            font-size: calc(10px * var(--font-scale)); font-weight: 800; color: var(--text-sub); opacity: 0.7;
-        }
-        .lbl-idx { width: 22px; margin-right: 5px; }
-        .lbl-time { width: 85px; margin-right: 5px; }
-        .lbl-class { width: 55px; margin-right: 5px; text-align: center; }
-
         .card {
-            background: var(--card); border-radius: 10px; 
-            padding: 7px 10px; margin-bottom: 4px; border: 1px solid var(--border);
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 18px;
+            padding: 12px;
+            margin-bottom: 10px;
         }
-        .lesson-row { display: flex; align-items: center; gap: 6px; }
-
-        .item-idx { color: var(--primary); width: 22px; font-size: calc(15px * var(--font-scale)); font-weight: 900; }
-        .item-time { color: var(--text-sub); width: 85px; font-size: calc(12px * var(--font-scale)); font-weight: 700; }
-        .item-class { 
-            background: var(--primary); color: #ffffff;
-            padding: 3px 5px; border-radius: 6px; width: 55px; 
-            text-align: center; font-size: calc(11px * var(--font-scale)); font-weight: 900;
-            border: 1px solid var(--primary);
-        }
-        .item-class.empty-val { background: transparent; border-color: transparent; }
-        .item-title { 
-            text-transform: uppercase; flex: 1; 
-            color: var(--text-main); font-size: calc(14px * var(--font-scale)); font-weight: 800; line-height: 1.1;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-
-        .theme-selector {
-            display: flex; background: var(--bg); border: 1px solid var(--border);
-            border-radius: 10px; padding: 3px; margin-bottom: 8px;
-        }
-        .theme-btn {
-            flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
-            padding: 8px; border-radius: 8px; border: none; background: transparent;
-            color: var(--text-sub); font-size: 11px; font-weight: 800; cursor: pointer;
-        }
-        .theme-btn.active { background: var(--card); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .grid-item { display: flex; flex-direction: column; }
-        
-        input, select { 
-            height: 36px; font-size: calc(14px * var(--font-scale)); border-radius: 8px; 
-            background: var(--bg); color: var(--text-main); 
-            border: 1px solid var(--border); padding: 0 10px; width: 100%;
-        }
-        
-        label { 
-            font-size: calc(10px * var(--font-scale)); font-weight: 800; color: var(--text-sub); 
-            margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;
-        }
-
-        .btn-action {
-            width: 100%; padding: 12px; border-radius: 10px; border: none;
-            background: var(--primary); color: white; font-weight: 800; font-size: calc(14px * var(--font-scale)); margin-top: 10px;
-            cursor: pointer;
-        }
-        
-        .settings-card { padding: 10px 12px !important; margin-bottom: 5px !important; }
-        .row-num { color: var(--primary); font-weight: 900; font-size: calc(11px * var(--font-scale)); min-width: 50px; }
-
-        /* Animasyonlar */
-        .slide-left { animation: slideLeft 0.25s ease-out; }
-        .slide-right { animation: slideRight 0.25s ease-out; }
-        @keyframes slideLeft { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideRight { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .fade { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
+        /* ... (dosya çok uzun olduğu için burada kesilmedi) */
     </style>
 </head>
-<body data-theme="dark">
-    <div class="header-container">
-        <header class="top-brand"><div class="logo">DERS-<span>TAKİP</span></div></header>
-        <nav class="top-nav">
-            <div class="nav-item active" id="btnHome" onclick="setPage('home')">
-                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                <span>PROGRAM</span>
-            </div>
-            <div class="nav-item" id="btnSettings" onclick="setPage('settings')">
-                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
-                <span>AYARLAR</span>
-            </div>
-        </nav>
+
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<header class="topbar">
+    <div class="title">DERS-TAKİP</div>
+    <div class="nav">
+        <button onclick="setPage('home')">PROGRAM</button>
+        <button onclick="setPage('settings')">AYARLAR</button>
+    </div>
+</header>
+
+<!-- ===== ANA SAYFA ===== -->
+<main id="pageHome">
+    <div class="day-bar" id="dayBar"></div>
+
+    <div class="list-labels">
+        <div>#</div>
+        <div>ZAMAN</div>
+        <div>SINIF</div>
+        <div>DERS</div>
     </div>
 
-    <main id="pageHome">
-        <div class="day-bar" id="dayBar"></div>
-        <div class="list-labels">
-            <div class="lbl-idx">#</div>
-            <div class="lbl-time">ZAMAN</div>
-            <div class="lbl-class">SINIF</div>
-            <div>DERS</div>
-        </div>
-        <div id="scheduleList"></div>
-    </main>
+    <div id="scheduleList"></div>
 
-    <main id="pageSettings" class="hidden fade">
-        <div class="theme-selector">
-            <button class="theme-btn" id="tbtn-light" onclick="toggleTheme('light')">AÇIK MOD</button>
-            <button class="theme-btn active" id="tbtn-dark" onclick="toggleTheme('dark')">KOYU MOD</button>
-        </div>
+    <!-- ÖNEMLİ NOTLAR -->
+    <section id="notesPanel" class="notes-panel">
+        <div class="notes-panel__title">ÖNEMLİ NOTLAR</div>
+        <div id="notesList"></div>
+    </section>
+</main>
 
-        <div class="card settings-card">
-            <label>YAZI BOYUTU</label>
-            <select id="fontSizeSel" onchange="setFontScale(this.value)">
-                <option value="0.9">Küçük</option>
-                <option value="1">Normal</option>
-                <option value="1.1">Büyük</option>
-                <option value="1.2" selected>X Büyük</option>
-            </select>
-        </div>
+<!-- ===== AYARLAR ===== -->
+<main id="pageSettings" class="hidden">
+    <!-- Ayarlar içeriği -->
+</main>
 
-        <div class="card settings-card" style="border-color: #ef4444; background: rgba(239, 68, 68, 0.05);">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-weight:800; font-size:12px; color:#ef4444;">DÜZENLEME KİLİDİ</span>
-                <button onclick="handleLock()" id="lockToggle" style="padding:4px 10px; border-radius:8px; background:#ef4444; color:white; border:none; font-size:11px; font-weight:800;">AÇ</button>
-            </div>
-        </div>
-
-        <div class="card settings-card">
-            <div class="grid-2">
-                <div class="grid-item">
-                    <label>Başlangıç</label>
-                    <input type="time" id="cfgStart" disabled>
-                </div>
-                <div class="grid-item">
-                    <label>Ders (dk)</label>
-                    <input type="number" id="cfgDur" disabled placeholder="40">
-                </div>
-                <div class="grid-item">
-                    <label>Teneffüs (dk)</label>
-                    <input type="number" id="cfgBreak" disabled placeholder="10">
-                </div>
-                <div class="grid-item">
-                    <label>Öğle Arası (dk)</label>
-                    <input type="number" id="cfgLunch" disabled placeholder="45">
-                </div>
-            </div>
-        </div>
-
-        <div class="card settings-card">
-            <label>GÜN SEÇİN</label>
-            <select id="bulkDay" disabled onchange="renderBulkRows()"></select>
-        </div>
-
-        <div id="bulkRows"></div>
-        <button class="btn-action" id="btnSave" disabled onclick="saveAll()">KAYDET</button>
-    </main>
-
-    <script>
-        const lessons = {
-            "09": ["TÜRK DİLİ VE EDEBİYATI", "MATEMATİK", "İNGİLİZCE", "FİZİK", "KİMYA", "BİYOLOJİ", "TARİH", "COĞRAFYA", "ARAPÇA", "KURAN-I KERİM", "BEDEN EĞİTİMİ", "SAĞLIK BİLGİSİ", "REHBERLİK", "TEMEL DİNİ BİLGİLER"],
-            "10": ["TÜRK DİLİ VE EDEBİYATI", "MATEMATİK", "İNGİLİZCE", "FİZİK", "KİMYA", "BİYOLOJİ", "TARİH", "COĞRAFYA", "FELSEFE", "HADİS", "FIKIH", "SİYER", "ARAPÇA", "KURAN-I KERİM", "BEDEN EĞİTİMİ"],
-            "11": ["TÜRK DİLİ VE EDEBİYATI", "MATEMATİK", "İNGİLİZCE", "TARİH", "COĞRAFYA", "FELSEFE", "TEFSİR", "AKAİD", "HİTABET", "MESLEKİ ARAPÇA", "KURAN-I KERİM", "SEÇMELİ DERS", "BEDEN EĞİTİMİ"],
-            "12": ["TÜRK DİLİ VE EDEBİYATI", "MATEMATİK", "İNGİLİZCE", "T.C. İNKILAP TARİHİ", "COĞRAFYA", "DİNLER TARİHİ", "KELAM", "MESLEKİ ARAPÇA", "İSLAM KÜLTÜR VE MEDENİYETİ", "KURAN-I KERİM", "REHBERLİK", "SEÇMELİ DERS"]
-        };
-        const classSubs = {
-            "09": ["A", "B", "C", "D", "E", "İ", "J"], "10": ["A", "B", "C", "D", "İ", "J"],
-            "11": ["A", "B", "İ", "J"], "12": ["A", "B", "C", "İ", "J"]
-        };
-        const gunList = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
-        
-        let db = JSON.parse(localStorage.getItem('dersPlan_v1')) || {
-            schedule: [],
-            config: { start: "08:15", duration: 40, break: 10, lunch: 45, theme: "dark" }
-        };
-
-        let currentActiveDay = gunList[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
-        let isLocked = true;
-
-        // --- GELİŞTİRİLMİŞ SWIPE MANTIĞI ---
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        function handleGesture(endX, endY) {
-            const xDiff = touchStartX - endX;
-            const yDiff = touchStartY - endY;
-            const threshold = 60; // Yatay kaydırma hassasiyeti
-
-            // Yatay kaydırmanın dikeyden daha baskın olduğunu kontrol et (yanlışlıkla aşağı kaydırırken gün değişmesin)
-            if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > threshold) {
-                const currentIndex = gunList.indexOf(currentActiveDay);
-                if (xDiff > 0) {
-                    // Sola kaydırma -> Sonraki gün
-                    const next = (currentIndex === gunList.length - 1) ? 0 : currentIndex + 1;
-                    changeDay(gunList[next], 'left');
-                } else {
-                    // Sağa kaydırma -> Önceki gün
-                    const prev = (currentIndex === 0) ? gunList.length - 1 : currentIndex - 1;
-                    changeDay(gunList[prev], 'right');
-                }
-            }
-        }
-
-        function changeDay(newDay, direction) {
-            if (currentActiveDay === newDay) return;
-            currentActiveDay = newDay;
-            const list = document.getElementById('scheduleList');
-            
-            // Animasyon ekle
-            list.classList.remove('slide-left', 'slide-right');
-            void list.offsetWidth; 
-            list.classList.add(direction === 'left' ? 'slide-left' : 'slide-right');
-            
-            renderHome();
-
-            // Day bar tab'ını merkeze getir
-            const activeTab = document.querySelector('.day-tab.active');
-            if(activeTab) activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        }
-
-        function toggleTheme(t) {
-            db.config.theme = t;
-            document.body.setAttribute('data-theme', t);
-            document.getElementById('tbtn-light').classList.toggle('active', t === 'light');
-            document.getElementById('tbtn-dark').classList.toggle('active', t === 'dark');
-            localStorage.setItem('dersPlan_v1', JSON.stringify(db));
-        }
-
-        function setFontScale(val) {
-            document.documentElement.style.setProperty('--font-scale', val);
-            localStorage.setItem('fontScale', val);
-        }
-
-        function getTimes() {
-            let res = []; let time = db.config.start;
-            for(let i=0; i<8; i++) {
-                res.push(time);
-                let [h, m] = time.split(':').map(Number);
-                let d = new Date(); d.setHours(h, m + parseInt(db.config.duration));
-                let gap = (i === 3) ? parseInt(db.config.lunch) : parseInt(db.config.break);
-                d.setMinutes(d.getMinutes() + gap);
-                time = String(d.getHours()).padStart(2, '0') + ":" + String(d.getMinutes()).padStart(2, '0');
-            }
-            return res;
-        }
-
-        function setPage(p) {
-            document.getElementById('pageHome').classList.toggle('hidden', p !== 'home');
-            document.getElementById('pageSettings').classList.toggle('hidden', p !== 'settings');
-            document.getElementById('btnHome').classList.toggle('active', p === 'home');
-            document.getElementById('btnSettings').classList.toggle('active', p === 'settings');
-            if(p === 'home') renderHome();
-            if(p === 'settings') renderBulkRows();
-        }
-
-        function handleLock() {
-            isLocked = !isLocked;
-            document.getElementById('lockToggle').innerText = isLocked ? "AÇ" : "KİLİTLE";
-            document.querySelectorAll('#pageSettings input, #pageSettings select:not(#fontSizeSel), #btnSave').forEach(el => el.disabled = isLocked);
-        }
-
-        function renderHome() {
-            const list = document.getElementById('scheduleList');
-            const dayData = db.schedule.filter(s => s.day === currentActiveDay).sort((a,b) => a.idx - b.idx);
-            const times = getTimes();
-            document.querySelectorAll('.day-tab').forEach(t => t.classList.toggle('active', t.innerText === currentActiveDay));
-
-            if(dayData.length === 0) {
-                list.innerHTML = `<div class="card" style="text-align:center; color:var(--text-sub); font-size:12px; padding:40px 10px;">Henüz program girilmemiş.<br>Ayarlar sekmesinden bu gün için ders ekleyin.</div>`;
-                return;
-            }
-
-            let html = "";
-            dayData.forEach(s => {
-                let [h, m] = times[s.idx-1].split(':').map(Number);
-                let d = new Date(); d.setHours(h, m + parseInt(db.config.duration));
-                let end = String(d.getHours()).padStart(2, '0') + ":" + String(d.getMinutes()).padStart(2, '0');
-                
-                html += `<div class="card" style="${s.isEmpty ? 'opacity:0.4' : ''}">
-                    <div class="lesson-row">
-                        <div class="item-idx">${s.idx}</div>
-                        <div class="item-time">${times[s.idx-1]}-${end}</div>
-                        <div class="${s.isEmpty ? 'item-class empty-val' : 'item-class'}">${s.isEmpty ? '' : s.class}</div>
-                        <div class="item-title">${s.isEmpty ? 'BOŞ DERS' : s.lesson}</div>
-                    </div>
-                </div>`;
-            });
-            list.innerHTML = html;
-        }
-
-        function renderBulkRows() {
-            const container = document.getElementById('bulkRows');
-            const day = document.getElementById('bulkDay').value;
-            let html = "";
-            for(let i=1; i<=8; i++) {
-                const s = db.schedule.find(x => x.day === day && x.idx === i) || {};
-                const lvl = s.class ? s.class.split('/')[0] : "";
-                html += `<div class="card settings-card">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span class="row-num">${i}. DERS</span>
-                        <select id="lvl-${i}" onchange="updateSub(${i})" style="flex:1;"><option value="">Sınıf</option><option value="09" ${lvl=='09'?'selected':''}>9</option><option value="10" ${lvl=='10'?'selected':''}>10</option><option value="11" ${lvl=='11'?'selected':''}>11</option><option value="12" ${lvl=='12'?'selected':''}>12</option></select>
-                        <select id="sub-${i}" style="flex:1;"><option value="">Şube</option></select>
-                        <select id="les-${i}" style="flex:2;"><option value="">Ders</option></select>
-                    </div>
-                </div>`;
-            }
-            container.innerHTML = html;
-            for(let i=1; i<=8; i++) {
-                updateSub(i);
-                const s = db.schedule.find(x => x.day === day && x.idx === i) || {};
-                if(s.class) {
-                    document.getElementById(`sub-${i}`).value = s.class.split('/')[1];
-                    document.getElementById(`les-${i}`).value = s.lesson;
-                }
-            }
-        }
-
-        function updateSub(i) {
-            const l = document.getElementById(`lvl-${i}`).value;
-            const s = document.getElementById(`sub-${i}`);
-            const e = document.getElementById(`les-${i}`);
-            const prevSub = s.value;
-            const prevLes = e.value;
-            s.innerHTML = '<option value="">Şube</option>';
-            e.innerHTML = '<option value="">Ders</option>';
-            if(l) {
-                classSubs[l].forEach(x => s.innerHTML += `<option value="${x}">${x}</option>`);
-                lessons[l].forEach(x => e.innerHTML += `<option value="${x}">${x}</option>`);
-                s.value = prevSub; e.value = prevLes;
-            }
-        }
-
-        function saveAll() {
-            db.config.start = document.getElementById('cfgStart').value;
-            db.config.duration = document.getElementById('cfgDur').value;
-            db.config.break = document.getElementById('cfgBreak').value;
-            db.config.lunch = document.getElementById('cfgLunch').value;
-            const day = document.getElementById('bulkDay').value;
-            db.schedule = db.schedule.filter(x => x.day !== day);
-            for(let i=1; i<=8; i++) {
-                const l = document.getElementById(`lvl-${i}`).value;
-                const b = document.getElementById(`sub-${i}`).value;
-                const e = document.getElementById(`les-${i}`).value;
-                if(l && b && e) db.schedule.push({ day, idx: i, lesson: e, class: `${l}/${b}`, isEmpty: false });
-                else db.schedule.push({ day, idx: i, lesson: 'BOŞ', class: '', isEmpty: true });
-            }
-            localStorage.setItem('dersPlan_v1', JSON.stringify(db));
-            handleLock(); setPage('home');
-        }
-
-        window.onload = () => {
-            const savedFS = localStorage.getItem('fontScale') || "1";
-            setFontScale(savedFS);
-            if(document.getElementById('fontSizeSel')) document.getElementById('fontSizeSel').value = savedFS;
-
-            toggleTheme(db.config.theme || "dark");
-            
-            const bar = document.getElementById('dayBar');
-            const bulk = document.getElementById('bulkDay');
-            gunList.forEach(d => {
-                const btn = document.createElement('div');
-                btn.className = 'day-tab';
-                btn.innerText = d;
-                btn.onclick = () => { 
-                    const oldIdx = gunList.indexOf(currentActiveDay);
-                    const newIdx = gunList.indexOf(d);
-                    changeDay(d, newIdx > oldIdx ? 'left' : 'right');
-                };
-                bar.appendChild(btn);
-                bulk.innerHTML += `<option>${d}</option>`;
-            });
-
-            document.getElementById('cfgStart').value = db.config.start;
-            document.getElementById('cfgDur').value = db.config.duration;
-            document.getElementById('cfgBreak').value = db.config.break;
-            document.getElementById('cfgLunch').value = db.config.lunch;
-            
-            renderHome();
-
-            // --- TÜM SAYFAYI KAPSAYAN SWIPE EVENTLERİ ---
-            const mainPage = document.getElementById('pageHome');
-            
-            mainPage.addEventListener('touchstart', e => {
-                touchStartX = e.changedTouches[0].screenX;
-                touchStartY = e.changedTouches[0].screenY;
-            }, {passive: true});
-
-            mainPage.addEventListener('touchend', e => {
-                handleGesture(e.changedTouches[0].screenX, e.changedTouches[0].screenY);
-            }, {passive: true});
-        };
-    </script>
-</body>
-</html>
+<!-- ===== NOT MODALI ===== -->
+<div id="notesBackdrop" class="modal-backdrop hidden"></div>
+<div id="notesModal" class="notes-modal hidden">
+    <div class="notes-modal__header">
+        <button id="notesBackBtn">←</button>
+        <div>
+            <div class="notes-modal__title">ÖNEMLİ NOTLAR</div>
+            <div id="notesSub"></div>
+        </div
