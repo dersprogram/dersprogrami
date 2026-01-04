@@ -4,22 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Ders Takip v1</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         
         :root {
             --primary: #F97316;
-            --primary-light: rgba(99, 102, 241, 0.14);
-            --sat: env(safe-area-inset-top, 0px);
-            --sab: env(safe-area-inset-bottom, 0px);
             --bg: #0b1220;
             --text-main: #e5e7eb;
             --text-sub: #9ca3af;
             --card: #111827;
             --border: #1f2937;
-            --header-bg: rgba(11, 18, 32, 0.75);
+            --header-bg: rgba(11, 18, 32, 0.85);
             --font-scale: 1;
         }
 
@@ -29,106 +25,245 @@
             --text-sub: #64748b;
             --card: #ffffff;
             --border: #e5e7eb;
-            --header-bg: rgba(248, 250, 252, 0.85);
+            --header-bg: rgba(248, 250, 252, 0.9);
         }
 
-        * { 
-            -webkit-tap-highlight-color: transparent; 
-            box-sizing: border-box; 
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
             background-color: var(--bg); font-family: 'Inter', sans-serif; margin: 0; color: var(--text-main);
-            padding-top: calc(95px + var(--sat)); padding-bottom: calc(70px + var(--sab));
-            overflow-x: hidden;
-            width: 100vw;
+            padding-top: 100px; padding-bottom: 80px; overflow-x: hidden; width: 100vw;
         }
 
-        body[data-theme="dark"] {
-            -webkit-font-smoothing: antialiased;
-            text-rendering: optimizeLegibility;
+        /* Dış Çerçeve */
+        body::before {
+            content:""; position: fixed; inset: 10px; border: 4px solid var(--primary);
+            border-radius: 24px; pointer-events: none; z-index: 9999;
         }
 
         .header-container {
-            position: fixed; top: 0; left: 0; right: 0;
-            background: var(--header-bg); z-index: 1000;
-            border-bottom: 1px solid var(--border); padding-top: var(--sat);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            position: fixed; top: 0; left: 0; right: 0; background: var(--header-bg);
+            z-index: 1000; border-bottom: 1px solid var(--border); backdrop-filter: blur(10px);
         }
 
-        .top-brand { height: 42px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 6px; }
-        .logo { font-weight: 800; font-size: calc(16px * var(--font-scale)); color: var(--text-main); text-transform: uppercase; letter-spacing: 2px; }
+        .top-brand { height: 50px; display: flex; align-items: center; justify-content: center; }
+        .logo { font-weight: 800; font-size: 18px; letter-spacing: 2px; }
         .logo span { color: var(--primary); font-weight: 900; }
 
-        .top-nav { display: flex; height: 40px; padding: 0 22px; gap: 10px; align-items: center; }
+        .top-nav { display: flex; height: 45px; padding: 0 20px; gap: 10px; }
         .nav-item {
-            flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px;
-            height: 30px; border-radius: 8px; color: var(--text-sub); cursor: pointer;
-            font-size: calc(11px * var(--font-scale)); font-weight: 800;
+            flex: 1; display: flex; align-items: center; justify-content: center;
+            border-radius: 10px; color: var(--text-sub); cursor: pointer;
+            font-size: 12px; font-weight: 800; transition: 0.3s;
         }
         .nav-item.active { background: var(--primary); color: white; }
-        .nav-icon { width: 14px; height: 14px; stroke-width: 2.5; }
 
-        main { 
-            padding: 4px 8px; width: 100%; max-width: 500px; margin: 0 auto; 
-            position: relative; min-height: 70vh;
-            touch-action: pan-y;
-        }
+        main { padding: 10px 20px; max-width: 500px; margin: 0 auto; }
         .hidden { display: none !important; }
 
-        .day-bar { display: flex; gap: 5px; overflow-x: auto; padding: 4px 12px 8px 12px; scrollbar-width: none; }
+        .day-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
         .day-bar::-webkit-scrollbar { display: none; }
-        
         .day-tab {
-            padding: 6px 12px; border-radius: 8px; background: var(--card); border: 1px solid var(--border);
-            font-size: calc(12px * var(--font-scale)); font-weight: 700; color: var(--text-sub); flex-shrink: 0;
-            transition: all 0.2s;
+            padding: 8px 16px; border-radius: 12px; background: var(--card); border: 1px solid var(--border);
+            font-size: 12px; font-weight: 700; color: var(--text-sub); white-space: nowrap; cursor: pointer;
         }
         .day-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        .list-labels {
-            display: flex; align-items: center; padding: 0 10px 4px 10px;
-            font-size: calc(10px * var(--font-scale)); font-weight: 800; color: var(--text-sub); opacity: 0.7;
-        }
-        .lbl-idx { width: 22px; margin-right: 5px; }
-        .lbl-time { width: 85px; margin-right: 5px; }
-        .lbl-class { width: 55px; margin-right: 5px; text-align: center; }
-
         .card {
-            background: var(--card); border-radius: 10px; 
-            padding: 5px 8px; margin-bottom: 3px; border: 1px solid var(--border);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+            background: var(--card); border-radius: 16px; padding: 15px;
+            margin-bottom: 10px; border: 1px solid var(--border); position: relative;
         }
 
-        .lesson-card { position: relative; overflow: hidden; }
-        .lesson-row { display: flex; align-items: center; gap: 8px; padding-left: 6px; }
+        .lesson-row { display: flex; align-items: center; gap: 12px; }
+        .item-idx { color: var(--primary); font-weight: 900; width: 25px; font-size: 16px; }
+        .item-class { color: var(--primary); font-weight: 800; font-size: 12px; min-width: 50px; background: rgba(249,115,22,0.1); padding: 4px 8px; border-radius: 8px; text-align: center; }
+        .item-title { flex: 1; font-weight: 700; font-size: 15px; }
 
-        .item-idx { color: var(--primary); width: 24px; font-size: calc(15px * var(--font-scale)); font-weight: 900; margin-left: 4px; }
-        .item-time { color: var(--text-sub); width: 85px; font-size: calc(12px * var(--font-scale)); font-weight: 700; }
-        .item-class {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-sub);
-            padding: 4px 10px;
-            border-radius: 10px;
-            font-size: calc(12px * var(--font-scale));
-            font-weight: 900;
-            min-width: 54px;
-            text-align: center;
-        }
-        .item-class.empty-val { border-color: transparent; }
-        .item-title { 
-            flex: 1; 
-            color: var(--text-main); font-size: calc(14px * var(--font-scale)); font-weight: 700; line-height: 1.1;
-            letter-spacing: 0.2px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        .btn-action {
+            width: 100%; padding: 15px; background: var(--primary); color: white;
+            border: none; border-radius: 14px; font-weight: 800; cursor: pointer; margin-top: 10px;
         }
 
-        .theme-selector {
-            display: flex; background: var(--bg); border: 1px solid var(--border);
-            border-radius: 10px; padding: 3px; margin-bottom: 8px;
+        input, select, textarea { 
+            width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border);
+            color: var(--text-main); border-radius: 10px; margin-bottom: 10px; font-family: inherit;
         }
-        .theme-btn {
-            flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
-            padding: 8px; border-radius: 8px;
+
+        .modal-backdrop { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); 
+            display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 10000;
+        }
+        .modal { background: var(--card); width: 100%; max-width: 400px; border-radius: 24px; padding: 24px; border: 1px solid var(--border); }
+        
+        .note-indicator {
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            width: 8px; height: 8px; background: var(--primary); border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <header class="top-brand"><div class="logo">DERS <span>TAKİP</span></div></header>
+        <nav class="top-nav">
+            <div class="nav-item active" id="btnHome" onclick="setPage('home')">PROGRAM</div>
+            <div class="nav-item" id="btnSettings" onclick="setPage('settings')">AYARLAR</div>
+        </nav>
+    </div>
+
+    <main id="pageHome">
+        <div class="day-bar" id="dayBar"></div>
+        <div id="scheduleList"></div>
+        <div id="notesSection" style="margin-top: 20px;">
+            <div style="font-size: 11px; font-weight: 900; color: var(--text-sub); margin-bottom: 10px; letter-spacing: 1px;">ÖNEMLİ NOTLAR</div>
+            <div id="notesList"></div>
+        </div>
+    </main>
+
+    <main id="pageSettings" class="hidden">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:800; font-size:13px; color:#ef4444;">DÜZENLEME KİLİDİ</span>
+                <button onclick="toggleLock()" id="lockBtn" style="padding:8px 20px; border-radius:10px; background:var(--primary); color:white; border:none; font-weight:800;">AÇ</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <label style="font-size:11px; font-weight:800; color:var(--text-sub); display:block; margin-bottom:8px;">GÜN SEÇİN</label>
+            <select id="editDay" onchange="renderEditRows()" disabled></select>
+            <div id="editRows"></div>
+            <button class="btn-action" id="saveBtn" onclick="saveSchedule()" disabled>DEĞİŞİKLİKLERİ KAYDET</button>
+        </div>
+    </main>
+
+    <div id="noteModal" class="modal-backdrop hidden" onclick="if(event.target==this)closeModal()">
+        <div class="modal">
+            <h3 id="modalTitle" style="margin-top:0; color:var(--primary);">Ders Notu</h3>
+            <label style="font-size:11px; font-weight:800; opacity:0.7;">ÖDEV VEYA NOT</label>
+            <textarea id="noteText" placeholder="Buraya yazın..."></textarea>
+            <button class="btn-action" onclick="saveNote()">KAYDET</button>
+        </div>
+    </div>
+
+    <script>
+        const days = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
+        let db = JSON.parse(localStorage.getItem('ders_takip_data')) || { schedule: [], notes: {} };
+        let currentDay = days[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
+        let isLocked = true;
+        let activeNoteKey = null;
+
+        function setPage(p) {
+            document.getElementById('pageHome').classList.toggle('hidden', p !== 'home');
+            document.getElementById('pageSettings').classList.toggle('hidden', p !== 'settings');
+            document.getElementById('btnHome').classList.toggle('active', p === 'home');
+            document.getElementById('btnSettings').classList.toggle('active', p === 'settings');
+            if(p === 'home') renderHome();
+            else renderEditRows();
+        }
+
+        function toggleLock() {
+            isLocked = !isLocked;
+            document.getElementById('lockBtn').innerText = isLocked ? "AÇ" : "KİLİTLE";
+            document.getElementById('editDay').disabled = isLocked;
+            document.getElementById('saveBtn').disabled = isLocked;
+            renderEditRows();
+        }
+
+        function renderHome() {
+            const bar = document.getElementById('dayBar');
+            bar.innerHTML = days.map(d => `<div class="day-tab ${d===currentDay?'active':''}" onclick="currentDay='${d}';renderHome()">${d}</div>`).join('');
+
+            const list = document.getElementById('scheduleList');
+            const dayData = db.schedule.filter(s => s.day === currentDay).sort((a,b) => a.idx - b.idx);
+            
+            if(dayData.length === 0) {
+                list.innerHTML = `<div style="text-align:center; padding:40px; opacity:0.5; font-size:13px;">Program Henüz Boş</div>`;
+            } else {
+                list.innerHTML = dayData.map(s => `
+                    <div class="card" onclick="openModal('${s.day}', ${s.idx}, '${s.lesson}')">
+                        <div class="lesson-row">
+                            <div class="item-idx">${s.idx}</div>
+                            <div class="item-class">${s.class}</div>
+                            <div class="item-title">${s.lesson}</div>
+                        </div>
+                        ${db.notes[`${s.day}-${s.idx}`] ? '<div class="note-indicator"></div>' : ''}
+                    </div>
+                `).join('');
+            }
+            renderNotesPanel();
+        }
+
+        function renderEditRows() {
+            const day = document.getElementById('editDay').value || currentDay;
+            const container = document.getElementById('editRows');
+            let html = "";
+            for(let i=1; i<=8; i++) {
+                const s = db.schedule.find(x => x.day === day && x.idx === i) || {class:'', lesson:''};
+                html += `
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <span style="width:20px; font-weight:900; color:var(--primary); padding-top:10px;">${i}</span>
+                        <input type="text" id="c-${i}" placeholder="Sınıf" value="${s.class}" ${isLocked?'disabled':''} style="flex:1;">
+                        <input type="text" id="l-${i}" placeholder="Ders Adı" value="${s.lesson}" ${isLocked?'disabled':''} style="flex:2;">
+                    </div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function saveSchedule() {
+            const day = document.getElementById('editDay').value;
+            db.schedule = db.schedule.filter(x => x.day !== day);
+            for(let i=1; i<=8; i++) {
+                const cls = document.getElementById(`c-${i}`).value;
+                const les = document.getElementById(`l-${i}`).value;
+                if(les) db.schedule.push({ day, idx: i, lesson: les, class: cls });
+            }
+            localStorage.setItem('ders_takip_data', JSON.stringify(db));
+            toggleLock();
+            setPage('home');
+        }
+
+        function openModal(day, idx, title) {
+            activeNoteKey = `${day}-${idx}`;
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('noteText').value = db.notes[activeNoteKey] || "";
+            document.getElementById('noteModal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('noteModal').classList.add('hidden'); }
+
+        function saveNote() {
+            const txt = document.getElementById('noteText').value.trim();
+            if(txt) db.notes[activeNoteKey] = txt;
+            else delete db.notes[activeNoteKey];
+            localStorage.setItem('ders_takip_data', JSON.stringify(db));
+            closeModal();
+            renderHome();
+        }
+
+        function renderNotesPanel() {
+            const list = document.getElementById('notesList');
+            const keys = Object.keys(db.notes);
+            if(keys.length === 0) {
+                list.innerHTML = `<div style="font-size:12px; opacity:0.5;">Kayıtlı not bulunmuyor.</div>`;
+                return;
+            }
+            list.innerHTML = keys.map(k => {
+                const [d, idx] = k.split('-');
+                const lesson = db.schedule.find(s => s.day === d && s.idx == idx);
+                return `
+                    <div class="card" style="border-left: 4px solid var(--primary);">
+                        <div style="font-weight:800; font-size:12px; color:var(--primary); margin-bottom:5px;">${lesson ? lesson.lesson : 'Ders'} (${d})</div>
+                        <div style="font-size:13px; line-height:1.4;">${db.notes[k]}</div>
+                    </div>`;
+            }).join('');
+        }
+
+        window.onload = () => {
+            const select = document.getElementById('editDay');
+            days.forEach(d => select.innerHTML += `<option value="${d}">${d}</option>`);
+            select.value = currentDay;
+            renderHome();
+        };
+    </script>
+</body>
+</html>
