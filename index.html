@@ -1,127 +1,103 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Ders Takip</title>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Ders Takip v1</title>
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-:root{
-  --primary:#F97316;
-  --sat: env(safe-area-inset-top,0px);
-  --sab: env(safe-area-inset-bottom,0px);
-  --bg:#0b1220;
-  --text:#e5e7eb;
-  --sub:#9ca3af;
-  --border:#1f2937;
-  --header-bg:rgba(11,18,32,.75);
-}
+        :root {
+            --primary: #F97316;
+            --sat: env(safe-area-inset-top, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
+            --bg: #0b1220;
+            --text-main: #e5e7eb;
+            --text-sub: #9ca3af;
+            --card: #111827;
+            --border: #1f2937;
+            --header-bg: rgba(11, 18, 32, 0.75);
+            --font-scale: 1;
+        }
 
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-body{
-  margin:0;
-  font-family:Inter,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  overflow:hidden; /* 🔒 dış scroll yok */
-}
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            padding-top: calc(95px + var(--sat));
+            overflow-x: hidden;
+        }
 
-/* ======================
-   UYGULAMA ÇERÇEVESİ
-====================== */
-.app-frame{
-  position:fixed;
-  inset:0;
-  border:3px solid var(--primary);
-  border-radius:22px;
-  overflow:hidden; /* ALTTA KAYBOLMA BURADA */
-}
+        .header-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(15px);
+            padding-top: var(--sat);
+        }
 
-/* ======================
-   ÜST SABİT BAŞLIK
-====================== */
-.header{
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  z-index:10;
-  background:var(--header-bg);
-  backdrop-filter:blur(14px);
-  border-bottom:1px solid var(--border);
-  padding-top:var(--sat);
-}
+        .top-brand {
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
 
-.header-title{
-  height:36px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:900;
-  letter-spacing:2px;
-}
+        .top-nav {
+            display: flex;
+            height: 40px;
+            padding: 0 10px;
+            gap: 6px;
+        }
 
-.nav{
-  display:flex;
-  gap:6px;
-  padding:6px;
-}
+        .nav-item {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-sub);
+        }
 
-.nav button{
-  flex:1;
-  height:30px;
-  border-radius:8px;
-  border:none;
-  font-weight:800;
-  font-size:11px;
-  color:var(--sub);
-  background:none;
-}
+        .nav-item.active {
+            background: var(--primary);
+            color: #fff;
+            border-radius: 8px;
+        }
 
-.nav button.active{
-  background:var(--primary);
-  color:#fff;
-}
+        main {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 8px;
+            padding-bottom: calc(26px + var(--sab));
+            overflow: hidden;
+        }
 
-/* ======================
-   KAYDIRILAN ALAN
-====================== */
-.content{
-  position:absolute;
-  top:95px;
-  bottom:26px; /* 🔥 ALT ŞERİT SINIRI */
-  left:0;
-  right:0;
-  overflow-y:auto;
-  padding:8px 10px;
-}
+        #notesPanel {
+            margin-bottom: 26px;
+        }
 
-/* ======================
-   ÖRNEK NOT ALANI
-====================== */
-.card{
-  background:#111827;
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:12px;
-  margin-bottom:8px;
-  font-weight:700;
-}
-
-/* ======================
-   ALT TURUNCU ŞERİT
-====================== */
-.bottom-bar{
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
+        .bottom-frame {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 26px;
+            background: #F97316;
