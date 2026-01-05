@@ -3,223 +3,1572 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ders Takip</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Ders Takip v1</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         
         :root {
             --primary: #F97316;
+            --primary-light: rgba(99, 102, 241, 0.14);
+            --sat: env(safe-area-inset-top, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
             --bg: #0b1220;
             --text-main: #e5e7eb;
             --text-sub: #9ca3af;
             --card: #111827;
             --border: #1f2937;
+            --header-bg: rgba(11, 18, 32, 0.75);
+            --font-scale: 1;
         }
 
-        body {
-            background-color: var(--bg);
-            font-family: 'Inter', sans-serif;
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px 10px;
+        [data-theme="light"] {
+            --bg: #f8fafc;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --card: #ffffff;
+            --border: #e5e7eb;
+            --header-bg: rgba(248, 250, 252, 0.85);
         }
+
+        * { 
+            -webkit-tap-highlight-color: transparent; 
+            box-sizing: border-box; 
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        body {
+            background-color: var(--bg); font-family: 'Inter', sans-serif; margin: 0; color: var(--text-main);
+            padding-top: calc(95px + var(--sat)); padding-bottom: calc(10px + var(--sab));
+            overflow-x: hidden;
+            width: 100vw;
+        }
+
+
+        body[data-theme="dark"] {
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        .header-container {
+            position: fixed; top: 0; left: 0; right: 0;
+            background: var(--header-bg); z-index: 1000;
+            border-bottom: 1px solid var(--border); padding-top: var(--sat);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+        }
+
+        .top-brand { height: 42px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 6px; }
+        .logo { font-weight: 800; font-size: calc(16px * var(--font-scale)); color: var(--text-main); text-transform: uppercase; letter-spacing: 2px; }
+        .logo span { color: var(--primary); font-weight: 900; }
+
+        .top-nav { display: flex; height: 40px; padding: 0 22px; gap: 10px; align-items: center; }
+        .nav-item {
+            flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px;
+            height: 30px; border-radius: 8px; color: var(--text-sub); cursor: pointer;
+            font-size: calc(11px * var(--font-scale)); font-weight: 800;
+        }
+        .nav-item.active { background: var(--primary); color: white; }
+        .nav-icon { width: 14px; height: 14px; stroke-width: 2.5; }
+
+        /* Main alanı swipe için geliştirildi */
+        main { 
+            padding: 4px 8px; width: 100%; max-width: 500px; margin: 0 auto; 
+            position: relative; min-height: 70vh;
+            touch-action: pan-y; /* Yatayda JS, dikeyde tarayıcı yönetir */
+        }
+        .hidden { display: none !important; }
+
+        .day-bar { display: flex; gap: 5px; overflow-x: auto; padding: 4px 12px 8px 12px; scrollbar-width: none; }
+        .day-bar::-webkit-scrollbar { display: none; }
+        
+        .day-tab {
+            padding: 6px 12px; border-radius: 8px; background: var(--card); border: 1px solid var(--border);
+            font-size: calc(12px * var(--font-scale)); font-weight: 700; color: var(--text-sub); flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .day-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .list-labels {
+            display: flex; align-items: center; padding: 0 10px 4px 10px;
+            font-size: calc(10px * var(--font-scale)); font-weight: 800; color: var(--text-sub); opacity: 0.7;
+        }
+        .lbl-idx { width: 22px; margin-right: 5px; }
+        .lbl-time { width: 85px; margin-right: 5px; }
+        .lbl-class { width: 55px; margin-right: 5px; text-align: center; }
 
         .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 8px;
-            position: relative;
+            background: var(--card); border-radius: 10px; 
+            padding: 5px 8px; margin-bottom: 3px; border: 1px solid var(--border);
+                   box-shadow: 0 1px 2px rgba(0,0,0,0.06);
         }
 
-        /* --- NOKTA GÖSTERGESİ KESİN ÇÖZÜM --- */
-        .lesson-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .lesson-card { position: relative; overflow: hidden; }
+        .lesson-card::before{
+            content:"";
+            position:absolute;
+            left:0; top:0; bottom:0;
+            width:3px;
+            background: var(--lesson-accent, transparent);
+            opacity: 0.9;
+        }
+        .lesson-card::after{
+            content:"";
+            position:absolute;
+            right:0; top:0; bottom:0;
+            width:3px;
+            background: var(--lesson-accent, transparent);
+            opacity: 0.9;
         }
 
-        /* Noktaların kutusu: Sıra numarasının hemen solunda */
-        .mini-indicator {
-            display: flex;
-            gap: 3px;
-            min-width: 12px;
-            justify-content: center;
-        }
+        .lesson-row { display: flex; align-items: center; gap: 8px; padding-left: 6px; }
 
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--primary);
-            box-shadow: 0 0 6px var(--primary);
-            display: none; /* Veri yoksa gizli */
-        }
-
-        /* Veri olduğunda noktayı göster */
-        .dot.on {
-            display: block !important;
-        }
-
-        .item-idx {
+        .item-idx { color: var(--lesson-accent, var(--primary)); width: 24px; font-size: calc(15px * var(--font-scale)); font-weight: 900; margin-left: 4px; }
+        .item-time { color: var(--text-sub); width: 85px; font-size: calc(12px * var(--font-scale)); font-weight: 700; }
+        .item-class {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(249,115,22,0.25);
             color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: calc(12px * var(--font-scale));
             font-weight: 900;
-            font-size: 16px;
-            width: 20px;
+            min-width: 54px;
             text-align: center;
         }
-
-        .item-title {
-            flex: 1;
-            font-weight: 700;
-            font-size: 14px;
+        .item-class.empty-val { background: transparent; border-color: transparent; }
+        .item-title { 
+            flex: 1; 
+            color: var(--text-main); font-size: calc(14px * var(--font-scale)); font-weight: 700; line-height: 1.1;
+            letter-spacing: 0.2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        .item-class {
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--text-sub);
-            border: 1px solid var(--border);
-            padding: 2px 6px;
-            border-radius: 6px;
+        .theme-selector {
+            display: flex; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 10px; padding: 3px; margin-bottom: 8px;
+        }
+        .theme-btn {
+            flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 8px; border-radius: 8px; border: none; background: transparent;
+            color: var(--text-sub); font-size: 11px; font-weight: 800; cursor: pointer;
+        }
+        .theme-btn.active { background: var(--card); color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-item { display: flex; flex-direction: column; }
+        
+        input, select { 
+            height: 36px; font-size: calc(14px * var(--font-scale)); border-radius: 8px; 
+            background: var(--bg); color: var(--text-main); 
+            border: 1px solid var(--border); padding: 0 10px; width: 100%;
+        }
+        
+        label { 
+            font-size: calc(10px * var(--font-scale)); font-weight: 800; color: var(--text-sub); 
+            margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;
         }
 
-        .day-bar {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-            overflow-x: auto;
-            padding-bottom: 5px;
+        .btn-action {
+            width: 100%; padding: 12px; border-radius: 10px; border: none;
+            background: var(--primary); color: white; font-weight: 800; font-size: calc(14px * var(--font-scale)); margin-top: 10px;
+            cursor: pointer;
         }
+        
+        .settings-card { padding: 10px 12px !important; margin-bottom: 5px !important; }
+        .row-num { color: var(--primary); font-weight: 900; font-size: calc(11px * var(--font-scale)); min-width: 50px; }
 
-        .day-tab {
-            padding: 8px 16px;
-            background: var(--card);
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 700;
-            white-space: nowrap;
-            border: 1px solid var(--border);
-        }
+        /* Animasyonlar */
+        .slide-left { animation: slideLeft 0.25s ease-out; }
+        .slide-right { animation: slideRight 0.25s ease-out; }
+        @keyframes slideLeft { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideRight { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .fade { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* --- Ödev / Not / Sınav modal + önem listesi --- */
+        .notes-panel { margin-top: 8px; padding-left: 6px; padding-right: 6px; }
+        .notes-header { display:flex; justify-content:space-between; align-items:center; padding: 6px 6px 8px 6px; }
+        .notes-title { font-size: calc(11px * var(--font-scale)); font-weight: 900; letter-spacing: .8px; color: var(--text-sub); }
+        .notes-clear { background: transparent; border: 1px solid vvar Snake = (function () {
+ar(--border); color: var(--text-sub);
+            border-radius: 8px; padding: 6px 10px; font-size: calc(10px * var(--font-scale)); font-weight: 900; cursor:pointer; }
+        .note-item { display:flex; gap:10px; align-items:flex-start; }
+        .note-badge{display:none;}/*note-badge*/
+        .note-badge { min-width: 46px; text-align:center; border-radius: 8px; padding: 4px 6px; font-weight: 900; font-size: calc(10px * var(--font-scale)); border: 1px solid var(--border); }
+        .note-content { flex: 1; }
+        .note-top { display:flex; justify-content:space-between; gap:8px; }
+        .note-lesson { font-weight: 900; font-size: calc(12px * var(--font-scale)); }
+        .note-meta { color: var(--text-sub); font-weight: 800; font-size: calc(10px * var(--font-scale)); margin-top: 2px; }
+        .note-text { margin-top: 6px; font-size: calc(12px * var(--font-scale)); font-weight: 700; line-height: 1.25; color: var(--text-main); opacity: 0.95; }
+        .note-actions { display:flex; gap:6px; margin-top: 8px; }
+        .chip-btn { border: 1px solid var(--border); background: transparent; color: var(--text-sub);
+            border-radius: 999px; padding: 6px 10px; font-size: calc(10px * var(--font-scale)); font-weight: 900; cursor:pointer; }
+        .chip-btn.danger { border-color: #ef4444; color: #ef4444; }
+        .mini-indicator { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); display: flex; gap: 0; margin-top: 0; pointer-events: none; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--primary); opacity: 0; transition: opacity .18s ease; }
+        .dot.on { background: var(--primary); opacity: 1; }
 
-        .day-tab.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 2000; display:flex; align-items:flex-end; justify-content:center; padding: 10px; padding-bottom: calc(10px + var(--sab)); }
+        .modal { width: 100%; max-width: 520px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow:hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.35); }
+        .modal-head { display:flex; justify-content:space-between; align-items:center; padding: 12px 12px; border-bottom: 1px solid var(--border); }
+        .modal-title { font-weight: 900; font-size: calc(13px * var(--font-scale)); }
+        .modal-close { background: transparent; border: 1px solid var(--border); color: var(--text-sub); border-radius: 10px; padding: 6px 10px; font-weight: 900; cursor:pointer; }
+        .modal-body { padding: 12px; }
+        .modal-body textarea { width: 100%; min-height: 90px; resize: vertical; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); font-size: calc(13px * var(--font-scale)); font-weight: 700; }
+        .modal-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .modal-actions { padding: 12px; border-top: 1px solid var(--border); display:flex; gap: 10px; }
+        .btn-ghost { flex:1; background: transparent; border: 1px solid var(--border); color: var(--text-sub); border-radius: 12px; padding: 12px; font-weight: 900; cursor:pointer; }
+        .btn-primary { flex:2; background: var(--primary); border: none; color: white; border-radius: 12px; padding: 12px; font-weight: 900; cursor:pointer; }
 
-        /* Modal Stilleri */
-        .hidden { display: none !important; }
-        .modal-backdrop {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-            display: flex; align-items: flex-end; z-index: 2000;
-        }
-        .modal {
-            width: 100%; background: var(--card); padding: 20px;
-            border-radius: 20px 20px 0 0; border-top: 3px solid var(--primary);
-        }
-        textarea {
-            width: 100%; height: 80px; background: var(--bg); border: 1px solid var(--border);
-            color: white; border-radius: 8px; padding: 10px; margin: 10px 0;
-        }
-        .btn-save {
-            width: 100%; padding: 14px; background: var(--primary); color: white;
-            border: none; border-radius: 10px; font-weight: 900; cursor: pointer;
-        }
-    </style>
+
+    
+.lesson-card::before,
+.lesson-card::after{
+    display:none !important;
+}
+
+
+/* --- Not alanını ve nokta göstergelerini içeri al --- */
+.note-card{
+  margin-left: 10px;
+  margin-right: 6px;
+}
+
+.note-card .mini-indicator{
+  margin-left: 26px; /* satır numarası hizası */
+}
+
+
+.lesson-card .mini-indicator{
+  margin-left: 26px;
+}
+
+
+/* --- Noktaları satır numaralarıyla TAM hizala --- */
+.lesson-card .mini-indicator{
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.lesson-card .mini-indicator{
+  display: flex;
+  gap: 6px;
+}
+
+.lesson-card .mini-indicator{
+  margin-left: 28px; /* item-idx genişliği + iç boşluk */
+}
+
+.note-card .mini-indicator{
+  margin-left: 28px;
+}
+
+
+/* --- Noktaları sıra numarasıyla AYNI HİZADAN başlat --- */
+.lesson-card .mini-indicator{
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.lesson-card .mini-indicator{
+  position: relative;
+  left: 0;
+}
+
+.lesson-card .mini-indicator{
+  margin-left: 0;
+}
+
+.lesson-card .mini-indicator{
+  justify-content: flex-start;
+}
+
+.note-card .mini-indicator{
+  margin-left: 0;
+}
+
+
+/* --- Noktalar: ilk nokta iki satır numarasının ORTASINDAN başlasın --- */
+/* Satır numarası yüksekliği ~24px kabul edilerek hizalama yapıldı */
+.lesson-card .mini-indicator{
+  margin-left: 0;
+  padding-left: 0;
+  padding-top: 10px;   /* iki satır numarası ortası hissi */
+}
+
+.lesson-card .mini-indicator .dot:first-child{
+  margin-top: 0;
+}
+
+.note-card .mini-indicator{
+  padding-top: 10px;
+}
+
+
+/* --- Not noktaları: biraz içeri al, rakam kolonuyla hizala --- */
+.lesson-card .mini-indicator{
+  padding-left: 10px;   /* kart iç padding ile aynı hiza */
+  margin-left: 0 !important;
+}
+.note-card .mini-indicator{
+  padding-left: 10px;
+}
+
+
+/* --- Varsayılan renkler: seçim yoksa TURUNCU --- */
+
+/* Satır numaraları */
+.item-idx{
+  color: var(--primary) !important;
+}
+
+/* Sınıf / şube etiketleri */
+.class-badge,
+.lesson-class,
+.badge-class{
+  color: var(--primary) !important;
+  border-color: rgba(249,115,22,0.35);
+}
+
+
+/* --- SINIF alanları varsayılan TURUNCU --- */
+.lesson-class,
+.class-badge,
+.badge-class,
+.class-pill{
+  color: var(--primary) !important;
+  background: rgba(249,115,22,0.08) !important;
+  border-color: rgba(249,115,22,0.4) !important;
+}
+
+
+/* --- SINIF ALANLARI: renk seçilmezse satır numarasıyla AYNI TURUNCU --- */
+.lesson-class,
+.class-badge,
+.badge-class,
+.class-pill{
+  color: var(--primary) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  font-weight: 700;
+}
+
+
+/* === SINIF / ŞUBE: Renk seçilmediyse SATIR NUMARASI GİBİ TURUNCU === */
+/* Satır numarası .item-idx nasıl görünüyorsa aynısını uygula */
+
+.lesson-class,
+.class-badge,
+.badge-class,
+.class-pill{
+  color: var(--primary) !important;
+  background: none !important;
+  border: none !important;
+  font-weight: 900;
+  font-size: inherit;
+}
+
+/* Eğer özel renk atanmışsa (inline style / data-color), ezme */
+.lesson-class[style*="color"],
+.class-badge[style*="color"],
+.badge-class[style*="color"],
+.class-pill[style*="color"]{
+  color: unset !important;
+}
+
+
+/* === SINIF / ŞUBE YAZILARI HER ZAMAN TURUNCU === */
+.lesson-class,
+.lesson-row .lesson-class,
+.lesson-row .class,
+.lesson-row .section,
+.lesson-row .badge,
+.lesson-row .pill,
+.lesson-row [class*="class"],
+.lesson-row [class*="section"]{
+  color: var(--primary) !important;
+  background: transparent !important;
+  border: none !important;
+  font-weight: 800;
+}
+
+
+/* === NOT NOKTALARI SATIRI GENİŞLETMESİN === */
+
+/* Nokta alanını mutlak konumlandır, satır yüksekliğini etkilemesin */
+.lesson-card .mini-indicator{
+  position: absolute;
+  left: 6px;               /* satır numarasına yakın */
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 8px;
+}
+
+/* Noktalar arası daha dar */
+.lesson-card .mini-indicator .dot{
+  width: 6px;
+  height: 6px;
+  margin-right: 4px;
+}
+
+/* Satır numarası ile nokta arası dar */
+.lesson-row{
+  padding-left: 28px;      /* nokta + numara için sabit alan */
+}
+
+/* Not kartındaki noktalar da aynı mantık */
+.note-card .mini-indicator{
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+
+/* === NOT GÖSTERGESİ: TEK NOKTA === */
+/* Birden fazla not olsa bile sadece ORTA NOKTA görünsün */
+
+/* Tüm noktaları gizle */
+.lesson-card .mini-indicator .dot{
+  display: none;
+}
+
+/* Sadece ilk (orta konumlanan) noktayı göster */
+.lesson-card .mini-indicator .dot:first-child{
+  display: inline-block;
+}
+
+/* Not kartı içindeki göstergeler için de aynı kural */
+.note-card .mini-indicator .dot{
+  display: none;
+}
+.note-card .mini-indicator .dot:first-child{
+  display: inline-block;
+}
+
+
+/* === TEK NOKTA: SIRA NUMARASI ORTASI + YAN ŞERİT HİZASI === */
+
+/* Satır numarası genişliği referans alınır */
+.lesson-row{
+  position: relative;
+}
+
+/* Noktayı satır numarasının TAM ORTASINA kilitle */
+.lesson-card .mini-indicator{
+  position: absolute;
+  left: 18px;              /* yan turuncu şerit + iç boşluk */
+  top: 50%;
+  transform: translateY(-50%);
+  height: 0;
+}
+
+/* Nokta boyutu ve görünümü */
+.lesson-card .mini-indicator .dot{
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+
+/* === ALT NOT ALANI: TURUNCU ŞERİDİN ALTINA GİRMESİN === */
+
+/* Ana içerik altına şerit yüksekliği kadar boşluk ekle */
+main{
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+}
+
+/* Notlar paneli için ekstra alt boşluk */
+#notesPanel{
+  margin-bottom: 24px;
+}
+
+/* Eğer sabit alt şerit varsa, not alanı onun üstünde kalsın */
+#notesPanel{
+  position: relative;
+  z-index: 2;
+}
+
+</style>
+
+<style>
+.field-row{display:flex;align-items:center;gap:8px}
+.field-row button{margin-left:auto}
+</style>
+
+
+<style>
+.delete-btn{
+  background:none;
+  border:none;
+  cursor:pointer;
+  font-size:18px;
+}
+.delete-btn:hover{opacity:0.7}
+</style>
+
+
+<style>
+/* mini delete icon button */
+.mini-del{
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+.mini-del:active{transform: scale(0.98);}
+.mini-del:hover{opacity:0.75}
+
+/* bottom sheet confirm */
+.confirm-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 9998;
+}
+.confirm-sheet{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  background: #fff;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  box-shadow: 0 -12px 40px rgba(0,0,0,0.18);
+  transform: translateY(110%);
+  transition: transform 180ms ease;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.confirm-sheet.show{transform: translateY(0);}
+.confirm-sheet__handle{
+  width: 44px;
+  height: 5px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 999px;
+  margin: 10px auto 6px;
+}
+.confirm-sheet__content{
+  padding: 14px 16px 16px;
+}
+.confirm-sheet__title{
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+.confirm-sheet__text{
+  font-size: 14px;
+  opacity: 0.85;
+  line-height: 1.35;
+  margin-bottom: 14px;
+}
+.confirm-sheet__actions{
+  display: flex;
+  gap: 10px;
+}
+.confirm-btn{
+  flex: 1;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.confirm-btn.secondary{
+  background: rgba(0,0,0,0.06);
+}
+.confirm-btn.danger{
+  background: rgba(220,38,38,0.12);
+  color: #b91c1c;
+}
+.hidden{display:none !important;}
+</style>
+
+
+<style>
+#notesPanel, #notesList, .note-card, .note-item, .note-actions button { pointer-events: auto; }
+</style>
+
+
+
+
+
+<style>
+/* PREVIEW3: remove class/section color pills on home; keep side stripes */
+.item-class{
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: var(--border) !important;
+  color: var(--text-sub) !important;
+}
+
+/* If there are other colored badges for class/branch, neutralize them */
+.badge, .pill, .chip, .sinif-badge, .sube-badge{
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: var(--border) !important;
+  color: var(--text-sub) !important;
+}
+
+/* Keep lesson side strips as-is (they use ::before/::after with --lesson-accent) */
+</style>
+
+
+<style>
+body::before{
+  content:"";
+  position: fixed;
+  inset: 10px;
+  border: 4px solid var(--primary);
+  border-radius: 22px;
+  pointer-events: none;
+  z-index: 9997;
+}
+</style>
+
 </head>
-<body>
+<body data-theme="dark">
+    <div class="header-container">
+        <header class="top-brand"><div class="logo">DERS <span>TAKİP</span></div></header>
+        <nav class="top-nav">
+            <div class="nav-item active" id="btnHome" onclick="setPage('home')">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <span>PROGRAM</span>
+            </div>
+            <div class="nav-item" id="btnSettings" onclick="setPage('settings')">
+                <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+                <span>AYARLAR</span>
+            </div>
+        </nav>
+    </div>
 
-    <div class="day-bar" id="dayBar"></div>
-    <div id="scheduleList"></div>
+    <main id="pageHome">
+        <div class="day-bar" id="dayBar"></div>
+        <div class="list-labels">
+            <div class="lbl-idx">#</div>
+            <div class="lbl-time">ZAMAN</div>
+            <div class="lbl-class">SINIF</div>
+            <div>DERS</div>
+        </div>
+                <div id="scheduleList"></div>
 
-    <div id="noteModal" class="modal-backdrop hidden" onclick="if(event.target===this)closeModal()">
-        <div class="modal">
-            <h3 id="modalTitle" style="margin:0">Ders Notu</h3>
-            <label style="font-size:11px; color:var(--text-sub)">ÖDEV / NOT</label>
-            <textarea id="noteInput" placeholder="Bir şeyler yazın..."></textarea>
-            <button class="btn-save" onclick="saveNote()">KAYDET</button>
+        <!-- DERS NOTLARI / ÖDEV / SINAV (Önceliğe göre) -->
+        <div id="notesPanel" class="notes-panel hidden">
+            <div class="notes-header">
+                <div class="notes-title">ÖNEMLİ NOTLAR</div>
+</div>
+            <div id="notesList"></div>
+        </div>
+
+    </main>
+
+    <main id="pageSettings" class="hidden fade" style="padding-left:18px; padding-right:18px;">
+        <div class="theme-selector">
+            <button class="theme-btn" id="tbtn-light" onclick="toggleTheme('light')">AÇIK MOD</button>
+            <button class="theme-btn active" id="tbtn-dark" onclick="toggleTheme('dark')">KOYU MOD</button>
+        </div>
+
+        <div class="card settings-card">
+            <label>YAZI BOYUTU</label>
+            <select id="fontSizeSel" onchange="setFontScale(this.value)">
+                <option value="0.7">Küçük</option>
+                <option value="0.8">Normal</option>
+                <option value="0.9">Büyük</option>
+                <option value="1" selected>X Büyük</option>
+            </select>
+        </div>
+
+        <div class="card settings-card" style="border-color: var(--border); background: var(--card);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:800; font-size:12px; color:#ef4444;">DÜZENLEME KİLİDİ</span>
+                <button onclick="handleLock()" id="lockToggle" style="padding:6px 14px; border-radius:10px; background:var(--primary); color:white; border:none; font-size:11px; font-weight:800;">AÇ</button>
+            </div>
+        </div>
+
+        <div class="card settings-card">
+            <div class="grid-2">
+                <div class="grid-item">
+                    <label>Başlangıç</label>
+                    <input type="time" id="cfgStart" disabled>
+                </div>
+                <div class="grid-item">
+                    <label>Ders (dk)</label>
+                    <input type="number" id="cfgDur" disabled placeholder="40">
+                </div>
+                <div class="grid-item">
+                    <label>Teneffüs (dk)</label>
+                    <input type="number" id="cfgBreak" disabled placeholder="10">
+                </div>
+                <div class="grid-item">
+                    <label>Öğle Arası (dk)</label>
+                    <input type="number" id="cfgLunch" disabled placeholder="45">
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="card settings-card">
+            <label>AKTİF GÜNLER</label>
+            <div id="dayToggles" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:6px;"></div>
+            <div style="margin-top:8px; font-size:11px; font-weight:800; color:var(--text-sub); opacity:0.85;">
+                Kapalı günler üstteki gün barında görünmez ve kaydırarak (swipe) geçişte atlanır.
+            </div>
+        </div>
+
+
+        
+<div class="card settings-card">
+            <label>GÜN SEÇİN</label>
+            <select id="bulkDay" disabled onchange="renderBulkRows()"></select>
+        </div>
+
+        <div id="bulkRows"></div>
+        <button class="btn-action" id="btnSave" disabled onclick="saveAll()">KAYDET</button>
+    </main>
+
+
+    
+<!-- ÖDEV / NOT / SINAV MODAL -->
+    <div id="noteModal" class="modal-backdrop hidden" onclick="onModalBackdrop(event)">
+        <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-head">
+                <div>
+                    <div class="modal-title" id="modalLessonTitle">DERS</div>
+                    <div class="note-meta" id="modalLessonMeta"></div>
+                </div>
+                <button class="modal-close" onclick="closeNoteModal()">KAPAT</button>
+            </div>
+            <div class="modal-body">
+                <div class="grid-item" style="margin-bottom:10px;">
+                    <div class="label-row"><label>ÖDEV</label><button class="mini-del" onclick="requestClear('homework')">🗑️</button></div>
+                    <textarea id="inpHomework" placeholder="Ödev bilgisini yazın..."></textarea>
+                </div>
+
+                <div class="grid-item" style="margin-bottom:10px;">
+                    <div class="label-row"><label>NOT</label><button class="mini-del" onclick="requestClear('note')">🗑️</button></div>
+                    <textarea id="inpNote" placeholder="Ders notunu yazın..."></textarea>
+                </div>
+
+                <div class="modal-grid">
+                    <div class="grid-item">
+                        <div class="label-row"><label>SINAV TARİHİ</label><button class="mini-del" onclick="requestClear('examDate')">🗑️</button></div>
+                        <input type="date" id="inpExamDate">
+                    </div>
+                    <div class="grid-item" style="display:none;">
+  <label>ÖNEM</label>
+  <input type="hidden" id="inpPriority" value="3">
+</div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-primary" onclick="saveNoteForLesson()">KAYDET</button>
+            </div>
         </div>
     </div>
 
     <script>
-        const gunList = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma"];
-        let currentDay = "Pazartesi";
-
-        // Örnek DB yapısı
-        let db = JSON.parse(localStorage.getItem('dersPlan_v1')) || {
-            schedule: [
-                { day: "Pazartesi", idx: 1, lesson: "MATEMATİK", class: "10/A" },
-                { day: "Pazartesi", idx: 2, lesson: "FİZİK", class: "10/A" },
-                { day: "Salı", idx: 1, lesson: "EDEBİYAT", class: "10/A" }
-            ],
-            annotations: {}
+        const lessons = {
+            "09": ["TÜRK DİLİ VE EDEBİYATI", "MATEMATİK", "İNGİLİZCE", "FİZİK", "KİMYA", "BİYOLOJİ", "TARİH", "COĞRAFYA", "ARAPÇA", "KURAN-I KERİM", "BEDEN EĞİTİMİ", "SAĞLIK BİLGİSİ", "REHBERLİK", "TEMEL DİNİ BİLGİLER"],
+            "10": ["TÜRK DİLİ VE EDEBİYATI", "MATEMATİK", "İNGİLİZCE", "FİZİK", "KİMYA", "BİYOLOJİ", "TARİH", "COĞRAFYA", "FELSEFE", "HADİS", "FIKIH", "SİYER", "ARAPÇA", "KURAN-I KERİM", "BEDEN EĞİTİMİ"],
+            "11": ["TÜRK DİLİ VE EDEBİYATI", "MATEMATİK", "İNGİLİZCE", "TARİH", "COĞRAFYA", "FELSEFE", "TEFSİR", "AKAİD", "HİTABET", "MESLEKİ ARAPÇA", "KURAN-I KERİM", "SEÇMELİ DERS", "BEDEN EĞİTİMİ"],
+            "12": ["TÜRK DİLİ VE EDEBİYATI", "MATEMATİK", "İNGİLİZCE", "T.C. İNKILAP TARİHİ", "COĞRAFYA", "DİNLER TARİHİ", "KELAM", "MESLEKİ ARAPÇA", "İSLAM KÜLTÜR VE MEDENİYETİ", "KURAN-I KERİM", "REHBERLİK", "SEÇMELİ DERS"]
         };
+        const classSubs = {
+            "09": ["A", "B", "C", "D", "E", "I", "J"], "10": ["A", "B", "C", "D", "I", "J"],
+            "11": ["A", "B", "I", "J"], "12": ["A", "B", "C", "I", "J"]
+        };
+        const gunList = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
+        // --- DERSLERE GÖRE OTOMATİK RENK (stabil) ---
+        const lessonPalette = [
+            "#6366f1", // indigo
+            "#0ea5e9", // sky
+            "#06b6d4", // cyan
+            "#10b981", // emerald
+            "#22c55e", // green
+            "#84cc16", // lime
+            "#f59e0b", // amber
+            "#f97316", // orange
+            "#ef4444", // red
+            "#ec4899", // pink
+            "#a855f7", // purple
+            "#14b8a6"  // teal
+        ];
 
-        function renderHome() {
+        function hashString(str){
+            let h = 0;
+            for(let i=0;i<str.length;i++){
+                h = ((h << 5) - h) + str.charCodeAt(i);
+                h |= 0; // 32-bit
+            }
+            return Math.abs(h);
+        }
+
+        function getAutoLessonColor(normalizedName){
+            if(!normalizedName || normalizedName === "BOŞ" || normalizedName === "BOŞ DERS") return "";
+            const idx = hashString(normalizedName) % lessonPalette.length;
+            return lessonPalette[idx];
+        }
+
+        // Manuel renk varsa onu kullan, yoksa otomatik (stabil) renge düş
+        function getLessonColor(lessonName){
+            const name = (lessonName || "").trim().toUpperCase();
+            if(!name || name === "BOŞ" || name === "BOŞ DERS") return "";
+            // Manuel renk kaldırıldı: otomatik (stabil) renk kullanılır
+            return getAutoLessonColor(name);
+        }
+
+
+        let db = JSON.parse(localStorage.getItem('dersPlan_v1')) || {
+            schedule: [],
+            config: { start: "08:15", duration: 40, break: 10, lunch: 45, theme: "dark" },
+            annotations: {} // { "Pazartesi-1": { homework, note, examDate, priority, updatedAt } }
+        };        // Eski kayıtlarla uyumluluk (migration)
+        if(!db.annotations) db.annotations = {};
+        // --- AKTİF GÜNLER (gizle/göster) ---
+        if(!db.activeDays || !Array.isArray(db.activeDays) || db.activeDays.length === 0){
+            db.activeDays = [...gunList];
+        } else {
+            // Geçersiz değerleri temizle
+            db.activeDays = db.activeDays.filter(d => gunList.includes(d));
+            if(db.activeDays.length === 0) db.activeDays = [...gunList];
+        }
+
+
+
+        let currentActiveDay = gunList[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
+        if(db.activeDays && Array.isArray(db.activeDays) && !db.activeDays.includes(currentActiveDay)){
+            currentActiveDay = db.activeDays[0] || currentActiveDay;
+        }
+        let isLocked = true;
+
+        // --- GELİŞTİRİLMİŞ SWIPE MANTIĞI ---
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        function handleGesture(endX, endY) {
+            const xDiff = touchStartX - endX;
+            const yDiff = touchStartY - endY;
+            const threshold = 60; // Yatay kaydırma hassasiyeti
+
+            // Yatay kaydırmanın dikeyden daha baskın olduğunu kontrol et (yanlışlıkla aşağı kaydırırken gün değişmesin)
+            if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > threshold) {
+                const days = getActiveDays();
+                const currentIndex = days.indexOf(currentActiveDay);
+                if (xDiff > 0) {
+                    // Sola kaydırma -> Sonraki gün
+                    const next = (currentIndex === days.length - 1) ? 0 : currentIndex + 1;
+                    changeDay(days[next], 'left');
+                } else {
+                    // Sağa kaydırma -> Önceki gün
+                    const prev = (currentIndex === 0) ? days.length - 1 : currentIndex - 1;
+                    changeDay(days[prev], 'right');
+                }
+            }
+        }
+
+        function changeDay(newDay, direction) {
+            if (currentActiveDay === newDay) return;
+            currentActiveDay = newDay;
             const list = document.getElementById('scheduleList');
-            const bar = document.getElementById('dayBar');
             
-            // Günleri oluştur
-            bar.innerHTML = gunList.map(d => `
-                <div class="day-tab ${d === currentDay ? 'active' : ''}" onclick="setDay('${d}')">${d}</div>
-            `).join('');
+            // Animasyon ekle
+            list.classList.remove('slide-left', 'slide-right');
+            void list.offsetWidth; 
+            list.classList.add(direction === 'left' ? 'slide-left' : 'slide-right');
+            
+            renderHome();
 
-            const dayData = db.schedule.filter(s => s.day === currentDay);
-            
-            if(dayData.length === 0) {
-                list.innerHTML = `<p style="text-align:center; opacity:0.5">Bu gün için ders programı boş.</p>`;
-                return;
+            // Day bar tab'ını merkeze getir
+            const activeTab = document.querySelector('.day-tab.active');
+            if(activeTab) activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+
+        function toggleTheme(t) {
+            db.config.theme = t;
+            document.body.setAttribute('data-theme', t);
+            document.getElementById('tbtn-light').classList.toggle('active', t === 'light');
+            document.getElementById('tbtn-dark').classList.toggle('active', t === 'dark');
+            localStorage.setItem('dersPlan_v1', JSON.stringify(db));
+        }
+
+        function setFontScale(val) {
+            document.documentElement.style.setProperty('--font-scale', val);
+            localStorage.setItem('fontScale', val);
+        }
+
+        function getTimes() {
+            let res = []; let time = db.config.start;
+            for(let i=0; i<8; i++) {
+                res.push(time);
+                let [h, m] = time.split(':').map(Number);
+                let d = new Date(); d.setHours(h, m + parseInt(db.config.duration));
+                let gap = (i === 3) ? parseInt(db.config.lunch) : parseInt(db.config.break);
+                d.setMinutes(d.getMinutes() + gap);
+                time = String(d.getHours()).padStart(2, '0') + ":" + String(d.getMinutes()).padStart(2, '0');
+            }
+            return res;
+        }
+
+        function setPage(p) {
+            document.getElementById('pageHome').classList.toggle('hidden', p !== 'home');
+            document.getElementById('pageSettings').classList.toggle('hidden', p !== 'settings');
+            document.getElementById('btnHome').classList.toggle('active', p === 'home');
+            document.getElementById('btnSettings').classList.toggle('active', p === 'settings');
+            if(p === 'home') renderHome();
+            if(p === 'settings') { renderBulkRows(); renderDayToggles(); }
+        }
+
+
+        function getActiveDays(){
+            return (db && Array.isArray(db.activeDays) && db.activeDays.length) ? db.activeDays : gunList;
+        }
+
+        function buildDayBar(){
+            const bar = document.getElementById('dayBar');
+            if(!bar) return;
+            bar.innerHTML = "";
+            getActiveDays().forEach(d => {
+                const btn = document.createElement('div');
+                btn.className = 'day-tab';
+                btn.innerText = d;
+                btn.onclick = () => { 
+                    const days = getActiveDays();
+                    const oldIdx = days.indexOf(currentActiveDay);
+                    const newIdx = days.indexOf(d);
+                    changeDay(d, newIdx > oldIdx ? 'left' : 'right');
+                };
+                bar.appendChild(btn);
+            });
+        }
+
+        function renderDayToggles(){
+            const wrap = document.getElementById('dayToggles');
+            if(!wrap) return;
+            wrap.innerHTML = "";
+            gunList.forEach(day => {
+                const checked = getActiveDays().includes(day);
+                const id = "tg-" + day;
+                const item = document.createElement('label');
+                item.setAttribute('for', id);
+                item.style.display = "flex";
+                item.style.alignItems = "center";
+                item.style.gap = "8px";
+                item.style.fontSize = "12px";
+                item.style.fontWeight = "800";
+                item.style.color = "var(--text-main)";
+                item.innerHTML = `<input id="${id}" type="checkbox" ${checked ? "checked" : ""} style="width:18px;height:18px;" /> ${day}`;
+                wrap.appendChild(item);
+
+                const cb = item.querySelector('input');
+                cb.addEventListener('change', () => toggleDay(day, cb.checked));
+            });
+        }
+
+        function toggleDay(day, on){
+            const days = new Set(getActiveDays());
+            if(on) days.add(day);
+            else days.delete(day);
+
+            // En az 1 gün açık kalsın
+            if(days.size === 0){
+                days.add(day);
+            }
+            db.activeDays = gunList.filter(d => days.has(d));
+
+            // Aktif gün kapandıysa, ilk aktif güne geç
+            if(!db.activeDays.includes(currentActiveDay)){
+                currentActiveDay = db.activeDays[0];
             }
 
-            list.innerHTML = dayData.map(s => {
-                const key = `${s.day}-${s.idx}`;
-                const hasData = db.annotations[key] && db.annotations[key].trim().length > 0;
-
-                return `
-                <div class="card" onclick="openModal('${s.day}', ${s.idx})">
-                    <div class="lesson-row">
-                        <div class="mini-indicator">
-                            <div class="dot ${hasData ? 'on' : ''}"></div>
-                        </div>
-                        <div class="item-idx">${s.idx}</div>
-                        <div class="item-class">${s.class}</div>
-                        <div class="item-title">${s.lesson}</div>
-                    </div>
-                </div>
-                `;
-            }).join('');
-        }
-
-        let activeKey = null;
-        function openModal(day, idx) {
-            activeKey = `${day}-${idx}`;
-            document.getElementById('modalTitle').innerText = idx + ". Ders Notları";
-            document.getElementById('noteInput').value = db.annotations[activeKey] || "";
-            document.getElementById('noteModal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('noteModal').classList.add('hidden');
-        }
-
-        function saveNote() {
-            const val = document.getElementById('noteInput').value;
-            if(val.trim()) db.annotations[activeKey] = val;
-            else delete db.annotations[activeKey];
-            
             localStorage.setItem('dersPlan_v1', JSON.stringify(db));
-            closeModal();
+            buildDayBar();
+            renderDayToggles();
             renderHome();
         }
 
-        function setDay(d) {
-            currentDay = d;
-            renderHome();
+        function handleLock() {
+            isLocked = !isLocked;
+            document.getElementById('lockToggle').innerText = isLocked ? "AÇ" : "KİLİTLE";
+            document.querySelectorAll('#pageSettings input, #pageSettings select:not(#fontSizeSel), #pageSettings button.color-ctl, #pageSettings .preset-swatch, #btnSave').forEach(el => {
+                if(el.classList && el.classList.contains('preset-swatch')){
+                    el.style.pointerEvents = isLocked ? 'none' : 'auto';
+                    el.style.opacity = isLocked ? '0.45' : '1';
+                } else {
+                    el.disabled = isLocked;
+                }
+            });
         }
 
-        window.onload = renderHome;
+        function renderHome() {
+    const list = document.getElementById('scheduleList');
+    const dayData = db.schedule.filter(s => s.day === currentActiveDay).sort((a,b) => a.idx - b.idx);
+    const times = getTimes();
+    document.querySelectorAll('.day-tab').forEach(t => t.classList.toggle('active', t.innerText === currentActiveDay));
+
+    // ✅ Ders + Sınıf bazlı (hafta geneli) kayıt bayrakları:
+    // Aynı ders adı farklı sınıflarda (ör. 12/I ve 09/C) ayrı ayrı takip edilir.
+    const sigFlags = {};
+    Object.keys(db.annotations || {}).forEach(k => {
+        const ann = db.annotations[k] || {};
+        const info = getLessonInfoByKey(k) || {};
+        const lessonName = (info.lesson || "").trim();
+        const className = (info.class || "").trim();
+        if(!lessonName || lessonName === "BOŞ" || lessonName === "BOŞ DERS") return;
+
+        const sig = `${lessonName}|||${className}`;
+        if(!sigFlags[sig]) sigFlags[sig] = { hw:false, nt:false, ex:false };
+        if(ann.homework && ann.homework.trim()) sigFlags[sig].hw = true;
+        if(ann.note && ann.note.trim()) sigFlags[sig].nt = true;
+        if(ann.examDate && ann.examDate.trim()) sigFlags[sig].ex = true;
+    });
+
+    // ✅ Bu günün programında yer alan derslerden hangilerinde (ders+sınıf) kayıt var?
+    const daySigSet = new Set();
+    dayData.forEach(s => {
+        if(!s || s.isEmpty) return;
+        const lessonName = (s.lesson || "").trim();
+        const className = (s.class || "").trim();
+        const sig = `${lessonName}|||${className}`;
+        const sf = sigFlags[sig];
+        if(sf && (sf.hw || sf.nt || sf.ex)) daySigSet.add(sig);
+    });
+
+    // ✅ Noktalar: Her ders+sınıf kombinasyonu için, o gün içerisindeki ilk saatinde göster
+    const firstIdxBySig = {};
+    dayData.forEach(s => {
+        if(!s || s.isEmpty) return;
+        const lessonName = (s.lesson || "").trim();
+        const className = (s.class || "").trim();
+        const sig = `${lessonName}|||${className}`;
+        if(daySigSet.has(sig) && firstIdxBySig[sig] == null) firstIdxBySig[sig] = s.idx;
+    });
+
+
+    if(dayData.length === 0) {
+        list.innerHTML = `<div class="card" style="text-align:center; color:var(--text-sub); font-size:12px; padding:40px 10px;">Henüz program girilmemiş.<br>Ayarlar sekmesinden bu gün için ders ekleyin.</div>`;
+        renderNotesPanel();
+        return;
+    }
+
+    let html = "";
+    dayData.forEach(s => {
+        let [h, m] = times[s.idx-1].split(':').map(Number);
+        let d = new Date(); d.setHours(h, m + parseInt(db.config.duration));
+        let end = String(d.getHours()).padStart(2, '0') + ":" + String(d.getMinutes()).padStart(2, '0');
+
+        const key = `${s.day}-${s.idx}`;
+        const ann = db.annotations[key] || {}; // slot bazlı kayıt (modal için gerekli)
+        // 🔸 Noktalar: Sadece günün ilk (boş olmayan) dersinde göster (gün özetine göre)
+        const lessonName2 = (s.lesson || "").trim();
+        const className2 = (s.class || "").trim();
+        const sig2 = `${lessonName2}|||${className2}`;
+        const sf2 = sigFlags[sig2] || { hw:false, nt:false, ex:false };
+
+        const showDots = (!s.isEmpty && daySigSet.has(sig2) && firstIdxBySig[sig2] === s.idx);
+        const hasHw = showDots && !!sf2.hw;
+        const hasNt = showDots && !!sf2.nt;
+        const hasExam = showDots && !!sf2.ex;
+
+        const accent = (!s.isEmpty) ? getLessonColor(s.lesson) : "";
+        const extraStyle = `${s.isEmpty ? "opacity:0.4;" : ""}${accent ? `--lesson-accent:${accent};` : ""}`;
+        html += `<div class="card lesson-card" data-day="${s.day}" data-idx="${s.idx}" style="${extraStyle}">
+            <div class="lesson-row">
+                <div class="item-idx">${s.idx}</div>
+                <div class="item-time">${times[s.idx-1]}-${end}</div>
+                <div class="${s.isEmpty ? 'item-class empty-val' : 'item-class'}">${s.isEmpty ? '' : s.class}</div>
+                <div class="item-title">${s.isEmpty ? 'BOŞ DERS' : s.lesson}</div>
+            </div>
+            ${(!s.isEmpty && (hasHw || hasNt || hasExam)) ? `
+                <div class="mini-indicator" title="Bu ders için kayıt var">
+                    <div class="dot ${hasHw ? 'on' : ''}"></div>
+                    <div class="dot ${hasNt ? 'on' : ''}"></div>
+                    <div class="dot ${hasExam ? 'on' : ''}"></div>
+                </div>` : ``}
+        </div>`;
+    });
+    list.innerHTML = html;
+
+    attachLongPressHandlers();
+    renderNotesPanel();
+}
+
+function renderBulkRows() {
+            const container = document.getElementById('bulkRows');
+            const day = document.getElementById('bulkDay').value;
+            let html = "";
+            for(let i=1; i<=8; i++) {
+                const s = db.schedule.find(x => x.day === day && x.idx === i) || {};
+                const lvl = s.class ? s.class.split('/')[0] : "";
+                html += `<div class="card settings-card">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="row-num">${i}. DERS</span>
+                        <select id="lvl-${i}" onchange="updateSub(${i})" style="flex:1;"><option value="">Sınıf</option><option value="09" ${lvl=='09'?'selected':''}>9</option><option value="10" ${lvl=='10'?'selected':''}>10</option><option value="11" ${lvl=='11'?'selected':''}>11</option><option value="12" ${lvl=='12'?'selected':''}>12</option></select>
+                        <select id="sub-${i}" style="flex:1;"><option value="">Şube</option></select>
+                        <select id="les-${i}" style="flex:2;"><option value="">Ders</option></select>
+                    </div>
+                </div>`;
+            }
+            container.innerHTML = html;
+            for(let i=1; i<=8; i++) {
+                updateSub(i);
+                const s = db.schedule.find(x => x.day === day && x.idx === i) || {};
+                if(s.class) {
+                    document.getElementById(`sub-${i}`).value = s.class.split('/')[1];
+                    document.getElementById(`les-${i}`).value = s.lesson;
+                }
+            }
+        }
+
+        function updateSub(i) {
+            const l = document.getElementById(`lvl-${i}`).value;
+            const s = document.getElementById(`sub-${i}`);
+            const e = document.getElementById(`les-${i}`);
+            const prevSub = s.value;
+            const prevLes = e.value;
+            s.innerHTML = '<option value="">Şube</option>';
+            e.innerHTML = '<option value="">Ders</option>';
+            if(l) {
+                classSubs[l].forEach(x => s.innerHTML += `<option value="${x}">${x}</option>`);
+                lessons[l].forEach(x => e.innerHTML += `<option value="${x}">${x}</option>`);
+                s.value = prevSub; e.value = prevLes;
+            }
+        }
+
+        function saveAll() {
+            db.config.start = document.getElementById('cfgStart').value;
+            db.config.duration = document.getElementById('cfgDur').value;
+            db.config.break = document.getElementById('cfgBreak').value;
+            db.config.lunch = document.getElementById('cfgLunch').value;
+            const day = document.getElementById('bulkDay').value;
+            db.schedule = db.schedule.filter(x => x.day !== day);
+            for(let i=1; i<=8; i++) {
+                const l = document.getElementById(`lvl-${i}`).value;
+                const b = document.getElementById(`sub-${i}`).value;
+                const e = document.getElementById(`les-${i}`).value;
+                if(l && b && e) db.schedule.push({ day, idx: i, lesson: e, class: `${l}/${b}`, isEmpty: false });
+                else db.schedule.push({ day, idx: i, lesson: 'BOŞ', class: '', isEmpty: true });
+            }
+            localStorage.setItem('dersPlan_v1', JSON.stringify(db));
+            handleLock(); setPage('home');
+        }
+
+
+
+// --- ÖDEV / NOT / SINAV KAYITLARI ---
+let activeLessonKey = null;
+
+function getLessonInfoByKey(key) {
+    const [day, idxStr] = key.split('-');
+    const idx = parseInt(idxStr, 10);
+    const s = db.schedule.find(x => x.day === day && x.idx === idx) || {};
+    return { day, idx, lesson: s.lesson || "DERS", class: s.class || "" };
+}
+function getTodayDayName() {
+    // Pazartesi..Pazar dizilimi ile uyumlu
+    const d = new Date();
+    const idx = (d.getDay() === 0) ? 6 : (d.getDay() - 1);
+    return gunList[idx];
+}
+
+function startOfDay(ts) {
+    const d = new Date(ts);
+    d.setHours(0,0,0,0);
+    return d.getTime();
+}
+
+function daysUntil(yyyy_mm_dd) {
+    if(!yyyy_mm_dd) return Number.POSITIVE_INFINITY;
+    const target = startOfDay(new Date(yyyy_mm_dd).getTime());
+    const today = startOfDay(Date.now());
+    return Math.round((target - today) / 86400000);
+}
+
+function isUrgentExam(item) {
+    if(!item || !item.examDate) return false;
+    const du = daysUntil(item.examDate);
+    return du >= 0 && du <= 3;
+}
+
+function isTodayLessonNote(item, todayDayName) {
+    if(!item) return false;
+    const hasHwOrNote = (item.text && item.text.trim().length > 0);
+    // "Notlar ve ödevler" için: dersin günü bugünse öne çıksın (sınav acil değilse)
+    return hasHwOrNote && item.day === todayDayName;
+}
+function openNoteModal(day, idx) {
+    activeLessonKey = `${day}-${idx}`;
+    const info = getLessonInfoByKey(activeLessonKey);
+    const ann = db.annotations[activeLessonKey] || { priority: 3 };
+
+    document.getElementById('modalLessonTitle').innerText = info.lesson;
+    document.getElementById('modalLessonMeta').innerText = `${info.day} • ${idx}. Ders • ${info.class || 'Sınıf yok'}`;
+
+    document.getElementById('inpHomework').value = ann.homework || "";
+    document.getElementById('inpNote').value = ann.note || "";
+    document.getElementById('inpExamDate').value = ann.examDate || "";
+    document.getElementById('inpPriority').value = String(ann.priority || 3);
+
+    document.getElementById('noteModal').classList.remove('hidden');
+}
+
+function closeNoteModal() {
+    document.getElementById('noteModal').classList.add('hidden');
+    activeLessonKey = null;
+}
+
+function onModalBackdrop(e) {
+    if(e.target && e.target.id === 'noteModal') closeNoteModal();
+}
+
+function saveNoteForLesson(keepOpen=false) {
+    if(!activeLessonKey) return;
+
+    const hw = document.getElementById('inpHomework').value.trim();
+    const nt = document.getElementById('inpNote').value.trim();
+    const ex = document.getElementById('inpExamDate').value.trim();
+    const pr = parseInt(document.getElementById('inpPriority').value, 10) || 3;
+
+    // Hiçbir alan yoksa sil gibi davran
+    if(!hw && !nt && !ex) {
+        delete db.annotations[activeLessonKey];
+    } else {
+        db.annotations[activeLessonKey] = { homework: hw, note: nt, examDate: ex, priority: pr, updatedAt: Date.now() };
+    }
+
+    localStorage.setItem('dersPlan_v1', JSON.stringify(db));
+    if(!keepOpen) closeNoteModal();
+    renderHome();
+}
+
+function deleteNoteForLesson() {
+    if(!activeLessonKey) return;
+    delete db.annotations[activeLessonKey];
+    localStorage.setItem('dersPlan_v1', JSON.stringify(db));
+    closeNoteModal();
+    renderHome();
+}
+
+function clearField(field) {
+    // field: 'homework' | 'note' | 'examDate'
+    const hwEl = document.getElementById('inpHomework');
+    const ntEl = document.getElementById('inpNote');
+    const exEl = document.getElementById('inpExamDate');
+
+    if(field === 'homework' && hwEl) hwEl.value = "";
+    if(field === 'note' && ntEl) ntEl.value = "";
+    if(field === 'examDate' && exEl) exEl.value = "";
+
+    // Kaydı güncelle ama modal açık kalsın
+    saveNoteForLesson(true);
+}
+
+
+
+function clearAllNotes() {
+    // Yalnızca kullanıcı isterse hepsini temizle
+    db.annotations = {};
+    localStorage.setItem('dersPlan_v1', JSON.stringify(db));
+    renderHome();
+}
+
+function buildNotesArray() {
+    const items = [];
+    Object.keys(db.annotations || {}).forEach(key => {
+        const ann = db.annotations[key] || {};
+        const info = getLessonInfoByKey(key);
+
+        const textParts = [];
+        if(ann.homework) textParts.push({ type: "ÖDEV", text: ann.homework });
+        if(ann.note) textParts.push({ type: "NOT", text: ann.note });
+
+        // Her ders için tek kart: metinleri birleştir
+        const combinedText = textParts.map(p => `${p.type}: ${p.text}`).join("\n\n");
+        const hasSomething = (combinedText && combinedText.trim()) || (ann.examDate && ann.examDate.trim());
+        if(!hasSomething) return;
+
+        items.push({
+            key,
+            day: info.day,
+            idx: info.idx,
+            lesson: info.lesson,
+            class: info.class,
+            priority: ann.priority || 3,
+            examDate: ann.examDate || "",
+            text: combinedText || "",
+            updatedAt: ann.updatedAt || 0
+        });
+    });
+
+    // Sıralama:
+// 1) Sınavına 3 gün (ve daha az) kalanlar en üste
+// 2) Bugünün gününe ait (ders günü bugün olan) ÖDEV/NOT kayıtları öne çıksın
+// 3) Sonra:  (yüksekten düşüğe) -> Sınav tarihi yakın olana -> En yeni güncelleme
+const todayDayName = getTodayDayName();
+items.sort((a,b) => {
+    const aUrgent = isUrgentExam(a);
+    const bUrgent = isUrgentExam(b);
+    if(aUrgent !== bUrgent) return (bUrgent ? 1 : 0) - (aUrgent ? 1 : 0);
+
+    if(aUrgent && bUrgent) {
+        const adu = daysUntil(a.examDate);
+        const bdu = daysUntil(b.examDate);
+        if(adu !== bdu) return adu - bdu;
+        if(b.priority !== a.priority) return b.priority - a.priority;
+        return (b.updatedAt || 0) - (a.updatedAt || 0);
+    }
+
+    const aToday = isTodayLessonNote(a, todayDayName);
+    const bToday = isTodayLessonNote(b, todayDayName);
+    if(aToday !== bToday) return (bToday ? 1 : 0) - (aToday ? 1 : 0);
+
+    if(b.priority !== a.priority) return b.priority - a.priority;
+
+    const ad = a.examDate ? new Date(a.examDate).getTime() : Number.POSITIVE_INFINITY;
+    const bd = b.examDate ? new Date(b.examDate).getTime() : Number.POSITIVE_INFINITY;
+    if(ad !== bd) return ad - bd;
+
+    return (b.updatedAt || 0) - (a.updatedAt || 0);
+});
+return items;
+}
+
+function renderNotesPanel() {
+    const panel = document.getElementById('notesPanel');
+    const list = document.getElementById('notesList');
+    if(!panel || !list) return;
+
+    const items = buildNotesArray();
+    if(items.length === 0) {
+        panel.classList.add('hidden');
+        list.innerHTML = "";
+        return;
+    }
+
+    panel.classList.remove('hidden');
+
+    let html = "";
+    items.forEach(it => {
+const meta = `${it.day} • ${it.idx}. Ders • ${it.class || 'Sınıf yok'}${it.examDate ? ' • Sınav: ' + it.examDate : ''}`;
+
+        html += `<div class="card lesson-card note-card" data-day="${it.day}" data-idx="${it.idx}" style="margin-bottom:6px; --lesson-accent:${getLessonColor(it.lesson)};">
+            <div class="note-item">
+                                <div class="note-content">
+                    <div class="note-top">
+                        <div class="note-lesson">${it.lesson}</div>
+                                            </div>
+                    <div class="note-meta">${meta}</div>
+                    ${it.text ? `<div class="note-text">${escapeHtml(it.text).replace(/\n/g,'<br>')}</div>` : ''}
+                    <div class="note-actions">
+                        <button class="chip-btn" onclick="event.stopPropagation(); openNoteModal('${it.day}', ${it.idx})">AÇ / DÜZENLE</button>
+                    </div>
+                    <div class="note-meta" style="margin-top:6px;"></div>
+                </div>
+            </div>
+        </div>`;
+    });
+    list.innerHTML = html;
+}
+
+function deleteAnnotation(key) {
+    delete db.annotations[key];
+    localStorage.setItem('dersPlan_v1', JSON.stringify(db));
+    renderHome();
+}
+
+function escapeHtml(str) {
+    return (str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// --- Uzun basma (mobile) / sağ tık (desktop) ile modal aç ---
+function attachLongPressHandlers() {
+    document.querySelectorAll('.lesson-card').forEach(card => {
+        const day = card.getAttribute('data-day');
+        const idx = parseInt(card.getAttribute('data-idx'), 10);
+
+        // boş derslerde açma
+        const s = db.schedule.find(x => x.day === day && x.idx === idx);
+        if(s && s.isEmpty) return;
+
+        let pressTimer = null;
+
+        const startPress = (e) => {
+            // scroll ile karışmasın
+            if(pressTimer) clearTimeout(pressTimer);
+            pressTimer = setTimeout(() => openNoteModal(day, idx), 550);
+        };
+
+        const cancelPress = () => {
+            if(pressTimer) clearTimeout(pressTimer);
+            pressTimer = null;
+        };
+
+        // Touch
+        card.addEventListener('touchstart', startPress, {passive:true});
+        card.addEventListener('touchend', cancelPress, {passive:true});
+        card.addEventListener('touchmove', cancelPress, {passive:true});
+
+        // Mouse
+        card.addEventListener('mousedown', startPress);
+        card.addEventListener('mouseup', cancelPress);
+        card.addEventListener('mouseleave', cancelPress);
+
+        // Sağ tık = hızlı aç
+        card.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            openNoteModal(day, idx);
+        });
+
+        // Tek tık: mevcut davranış yok; istersen burada açtırabiliriz
+    });
+}
+
+        
+
+window.onload = () => {
+            const savedFS = localStorage.getItem('fontScale') || "1";
+            setFontScale(savedFS);
+            if(document.getElementById('fontSizeSel')) document.getElementById('fontSizeSel').value = savedFS;
+
+            toggleTheme(db.config.theme || "dark");
+            
+            const bulk = document.getElementById('bulkDay');
+            // Bulk (ayarlar) menüsünde tüm günler görünsün
+            gunList.forEach(d => { bulk.innerHTML += `<option>${d}</option>`; });
+
+            // Gün barı sadece aktif günlerden oluşsun
+            buildDayBar();
+
+            document.getElementById('cfgStart').value = db.config.start;
+            document.getElementById('cfgDur').value = db.config.duration;
+            document.getElementById('cfgBreak').value = db.config.break;
+            document.getElementById('cfgLunch').value = db.config.lunch;
+            
+            renderHome();
+
+            // --- TÜM SAYFAYI KAPSAYAN SWIPE EVENTLERİ ---
+            const mainPage = document.getElementById('pageHome');
+            
+            mainPage.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+                touchStartY = e.changedTouches[0].screenY;
+            }, {passive: true});
+
+            mainPage.addEventListener('touchend', e => {
+                handleGesture(e.changedTouches[0].screenX, e.changedTouches[0].screenY);
+            }, {passive: true});
+        };
     </script>
+
+<script>
+function confirmDelete(message, callback){
+  if(confirm(message || "Bu alanı silmek istediğine emin misin?")){
+    callback();
+  }
+}
+</script>
+
+
+<!-- Custom Confirm Bottom Sheet -->
+<div id="confirmSheetBackdrop" class="confirm-backdrop hidden" aria-hidden="true"></div>
+<div id="confirmSheet" class="confirm-sheet hidden" role="dialog" aria-modal="true" aria-labelledby="confirmSheetTitle">
+  <div class="confirm-sheet__handle"></div>
+  <div class="confirm-sheet__content">
+    <div class="confirm-sheet__title" id="confirmSheetTitle">Silme Onayı</div>
+    <div class="confirm-sheet__text" id="confirmSheetText">Bu alanı silmek istediğine emin misin?</div>
+    <div class="confirm-sheet__actions">
+      <button class="confirm-btn secondary" id="confirmCancelBtn" type="button">Vazgeç</button>
+      <button class="confirm-btn danger" id="confirmOkBtn" type="button">Sil</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  let pendingClearField = null;
+
+  function qs(id){ return document.getElementById(id); }
+
+  function openConfirmSheet(text){
+    const backdrop = qs('confirmSheetBackdrop');
+    const sheet = qs('confirmSheet');
+    const sheetText = qs('confirmSheetText');
+    if(!backdrop || !sheet || !sheetText) return;
+
+    sheetText.textContent = text || "Bu alanı silmek istediğine emin misin?";
+    backdrop.classList.remove('hidden');
+    sheet.classList.remove('hidden');
+
+    // next tick for transition
+    requestAnimationFrame(()=> sheet.classList.add('show'));
+
+    // lock background scroll
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeConfirmSheet(){
+    const backdrop = qs('confirmSheetBackdrop');
+    const sheet = qs('confirmSheet');
+    if(!backdrop || !sheet) return;
+
+    sheet.classList.remove('show');
+    setTimeout(()=>{
+      backdrop.classList.add('hidden');
+      sheet.classList.add('hidden');
+      document.body.style.overflow = '';
+    }, 190);
+  }
+
+  // Expose a minimal API for existing buttons
+  window.requestClear = function(field){
+    pendingClearField = field;
+
+    const map = {
+      homework: "Ödev alanını silmek istediğine emin misin?",
+      note: "Not alanını silmek istediğine emin misin?",
+      examDate: "Sınav tarihini silmek istediğine emin misin?"
+    };
+    openConfirmSheet(map[field] || "Bu alanı silmek istediğine emin misin?");
+  };
+
+  document.addEventListener('click', function(e){
+    const id = e.target && e.target.id;
+    if(id === 'confirmCancelBtn'){
+      pendingClearField = null;
+      closeConfirmSheet();
+    }
+    if(id === 'confirmOkBtn'){
+      if(pendingClearField && typeof window.clearField === 'function'){
+        window.clearField(pendingClearField);
+      }
+      pendingClearField = null;
+      closeConfirmSheet();
+    }
+    if(id === 'confirmSheetBackdrop'){
+      pendingClearField = null;
+      closeConfirmSheet();
+    }
+  }, true);
+
+  // Escape to close (desktop)
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      pendingClearField = null;
+      closeConfirmSheet();
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
