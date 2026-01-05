@@ -1,13 +1,237 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Ders Takip v1</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Ders Takip v1</title>
 
-    <!-- === TÜM CSS === -->
-    <!-- (Dosyada olduğu gibi, tek satırı bile değiştirilmeden verilmiştir) -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-    <!-- ⚠️ KOD UZUN OLDUĞU İÇİN DEVAM EDİYOR -->
+:root{
+--primary:#F97316;
+--sat:env(safe-area-inset-top,0px);
+--sab:env(safe-area-inset-bottom,0px);
+--bg:#0b1220;
+--text-main:#e5e7eb;
+--text-sub:#9ca3af;
+--card:#111827;
+--border:#1f2937;
+--header-bg:rgba(11,18,32,.75);
+--font-scale:1;
+}
+
+[data-theme="light"]{
+--bg:#f8fafc;
+--text-main:#0f172a;
+--text-sub:#64748b;
+--card:#ffffff;
+--border:#e5e7eb;
+--header-bg:rgba(248,250,252,.85);
+}
+
+*{
+box-sizing:border-box;
+-webkit-tap-highlight-color:transparent;
+transition:.25s;
+}
+
+body{
+margin:0;
+font-family:Inter,sans-serif;
+background:var(--bg);
+color:var(--text-main);
+padding-top:calc(95px + var(--sat));
+padding-bottom:calc(20px + var(--sab));
+overflow-x:hidden;
+}
+
+.header-container{
+position:fixed;
+top:0;left:0;right:0;
+z-index:1000;
+background:var(--header-bg);
+border-bottom:1px solid var(--border);
+backdrop-filter:blur(14px);
+padding-top:var(--sat);
+}
+
+.top-brand{
+height:42px;
+display:flex;
+align-items:flex-end;
+justify-content:center;
+padding-bottom:6px;
+}
+
+.logo{
+font-weight:900;
+letter-spacing:2px;
+font-size:16px;
+}
+.logo span{color:var(--primary)}
+
+.top-nav{
+display:flex;
+gap:10px;
+padding:0 22px 8px;
+}
+
+.nav-item{
+flex:1;
+height:30px;
+border-radius:8px;
+display:flex;
+align-items:center;
+justify-content:center;
+gap:6px;
+font-size:11px;
+font-weight:800;
+color:var(--text-sub);
+}
+.nav-item.active{
+background:var(--primary);
+color:#fff;
+}
+
+main{
+max-width:520px;
+margin:auto;
+padding:6px 10px;
+}
+
+.day-bar{
+display:flex;
+gap:6px;
+overflow-x:auto;
+padding:6px;
+}
+.day-tab{
+padding:6px 14px;
+border-radius:8px;
+background:var(--card);
+border:1px solid var(--border);
+font-size:12px;
+font-weight:800;
+color:var(--text-sub);
+white-space:nowrap;
+}
+.day-tab.active{
+background:var(--primary);
+color:#fff;
+border-color:var(--primary);
+}
+
+.list-labels{
+display:flex;
+gap:6px;
+padding:4px 10px;
+font-size:10px;
+font-weight:900;
+opacity:.7;
+}
+
+.card{
+background:var(--card);
+border:1px solid var(--border);
+border-radius:10px;
+padding:6px 8px;
+margin-bottom:4px;
+position:relative;
+}
+
+.lesson-row{
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.item-idx{
+width:22px;
+font-weight:900;
+color:var(--primary);
+}
+.item-time{width:80px;font-size:12px;color:var(--text-sub)}
+.item-class{
+min-width:50px;
+text-align:center;
+font-weight:900;
+color:var(--primary);
+}
+.item-title{
+flex:1;
+font-weight:800;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.mini-indicator{
+position:absolute;
+left:18px;
+top:50%;
+transform:translateY(-50%);
+}
+.dot{
+width:6px;height:6px;
+border-radius:50%;
+background:var(--primary);
+}
+
+.hidden{display:none!important}
+
+/* SAYFA ÇERÇEVESİ */
+body::before{
+content:"";
+position:fixed;
+inset:10px;
+border:4px solid var(--primary);
+border-radius:22px;
+pointer-events:none;
+z-index:9999;
+}
+</style>
+</head>
+
+<body data-theme="dark">
+
+<div class="header-container">
+  <div class="top-brand">
+    <div class="logo">DERS <span>TAKİP</span></div>
+  </div>
+  <div class="top-nav">
+    <div class="nav-item active">PROGRAM</div>
+    <div class="nav-item">AYARLAR</div>
+  </div>
+</div>
+
+<main>
+  <div class="day-bar">
+    <div class="day-tab active">Pazartesi</div>
+    <div class="day-tab">Salı</div>
+    <div class="day-tab">Çarşamba</div>
+  </div>
+
+  <div class="list-labels">
+    <div style="width:22px">#</div>
+    <div style="width:80px">ZAMAN</div>
+    <div style="width:50px">SINIF</div>
+    <div>DERS</div>
+  </div>
+
+  <div class="card lesson-card">
+    <div class="lesson-row">
+      <div class="item-idx">1</div>
+      <div class="item-time">08:15-08:55</div>
+      <div class="item-class">12/J</div>
+      <div class="item-title">MATEMATİK</div>
+    </div>
+    <div class="mini-indicator"><div class="dot"></div></div>
+  </div>
+
+</main>
+
+</body>
+</html>
