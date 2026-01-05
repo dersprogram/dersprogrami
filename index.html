@@ -125,16 +125,11 @@
 
         .item-idx { color: var(--lesson-accent, var(--primary)); width: 24px; font-size: calc(15px * var(--font-scale)); font-weight: 900; margin-left: 4px; }
         .item-time { color: var(--text-sub); width: 85px; font-size: calc(12px * var(--font-scale)); font-weight: 700; }
-        .item-class {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(249,115,22,0.25);
-            color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 10px;
-            font-size: calc(12px * var(--font-scale));
-            font-weight: 900;
-            min-width: 54px;
-            text-align: center;
+        .item-class { 
+            background: var(--primary); color: #ffffff;
+            padding: 3px 8px; border-radius: 8px; width: 55px; 
+            text-align: center; font-size: calc(11px * var(--font-scale)); font-weight: 900;
+            border: 1px solid var(--primary);
         }
         .item-class.empty-val { background: transparent; border-color: transparent; }
         .item-title { 
@@ -189,8 +184,7 @@
         .notes-panel { margin-top: 8px; padding-left: 6px; padding-right: 6px; }
         .notes-header { display:flex; justify-content:space-between; align-items:center; padding: 6px 6px 8px 6px; }
         .notes-title { font-size: calc(11px * var(--font-scale)); font-weight: 900; letter-spacing: .8px; color: var(--text-sub); }
-        .notes-clear { background: transparent; border: 1px solid vvar Snake = (function () {
-ar(--border); color: var(--text-sub);
+        .notes-clear { background: transparent; border: 1px solid var(--border); color: var(--text-sub);
             border-radius: 8px; padding: 6px 10px; font-size: calc(10px * var(--font-scale)); font-weight: 900; cursor:pointer; }
         .note-item { display:flex; gap:10px; align-items:flex-start; }
         .note-badge{display:none;}/*note-badge*/
@@ -204,8 +198,8 @@ ar(--border); color: var(--text-sub);
         .chip-btn { border: 1px solid var(--border); background: transparent; color: var(--text-sub);
             border-radius: 999px; padding: 6px 10px; font-size: calc(10px * var(--font-scale)); font-weight: 900; cursor:pointer; }
         .chip-btn.danger { border-color: #ef4444; color: #ef4444; }
-        .mini-indicator { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); display: flex; gap: 0; margin-top: 0; pointer-events: none; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--primary); opacity: 0; transition: opacity .18s ease; }
+        .mini-indicator { display:flex; gap:6px; margin-top: 6px; }
+        .dot { width: 8px; height: 8px; border-radius: 99px; background: var(--border); opacity:.7; }
         .dot.on { background: var(--primary); opacity: 1; }
 
         .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 2000; display:flex; align-items:flex-end; justify-content:center; padding: 10px; padding-bottom: calc(10px + var(--sab)); }
@@ -459,7 +453,7 @@ ar(--border); color: var(--text-sub);
 /* Noktayı satır numarasının TAM ORTASINA kilitle */
 .lesson-card .mini-indicator{
   position: absolute;
-  left: 18px;              /* yan turuncu şerit + iç boşluk */
+  left: 12px;              /* yan turuncu şerit + iç boşluk */
   top: 50%;
   transform: translateY(-50%);
   height: 0;
@@ -471,25 +465,6 @@ ar(--border); color: var(--text-sub);
   height: 6px;
   border-radius: 50%;
   background: var(--primary);
-}
-
-
-/* === ALT NOT ALANI: TURUNCU ŞERİDİN ALTINA GİRMESİN === */
-
-/* Ana içerik altına şerit yüksekliği kadar boşluk ekle */
-main{
-  padding-bottom: calc(24px + env(safe-area-inset-bottom));
-}
-
-/* Notlar paneli için ekstra alt boşluk */
-#notesPanel{
-  margin-bottom: 24px;
-}
-
-/* Eğer sabit alt şerit varsa, not alanı onun üstünde kalsın */
-#notesPanel{
-  position: relative;
-  z-index: 2;
 }
 
 </style>
