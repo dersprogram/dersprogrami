@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Ders Takip</title>
     <style>
-        /* ... Mevcut genel stiller korunmuştur ... */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+        
         :root {
             --primary: #F97316;
             --bg: #0b1220;
@@ -15,83 +16,210 @@
             --border: #1f2937;
         }
 
-        /* NOKTA GÖSTERGESİ İÇİN KRİTİK CSS DÜZELTMELERİ */
-        .lesson-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 12px;
+        body {
+            background-color: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px 10px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
             position: relative;
         }
 
-        /* Noktaların olduğu konteyner: Satır numarasının hemen soluna sabitlendi */
+        /* --- NOKTA GÖSTERGESİ KESİN ÇÖZÜM --- */
+        .lesson-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Noktaların kutusu: Sıra numarasının hemen solunda */
         .mini-indicator {
             display: flex;
-            flex-direction: column; /* Noktaları alt alta veya yan yana dizebilirsiniz */
             gap: 3px;
-            min-width: 8px;
-            align-items: center;
+            min-width: 12px;
             justify-content: center;
         }
 
         .dot {
-            width: 7px;
-            height: 7px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             background: var(--primary);
-            display: none; /* Varsayılan gizli */
+            box-shadow: 0 0 6px var(--primary);
+            display: none; /* Veri yoksa gizli */
         }
 
+        /* Veri olduğunda noktayı göster */
         .dot.on {
-            display: block; /* Sadece veri varsa göster */
-            box-shadow: 0 0 5px var(--primary);
+            display: block !important;
         }
 
         .item-idx {
             color: var(--primary);
             font-weight: 900;
             font-size: 16px;
-            min-width: 20px;
+            width: 20px;
             text-align: center;
         }
 
-        /* Diğer stil tanımlamaları aynı kalabilir... */
+        .item-title {
+            flex: 1;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .item-class {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-sub);
+            border: 1px solid var(--border);
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .day-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .day-tab {
+            padding: 8px 16px;
+            background: var(--card);
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            border: 1px solid var(--border);
+        }
+
+        .day-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Modal Stilleri */
+        .hidden { display: none !important; }
+        .modal-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+            display: flex; align-items: flex-end; z-index: 2000;
+        }
+        .modal {
+            width: 100%; background: var(--card); padding: 20px;
+            border-radius: 20px 20px 0 0; border-top: 3px solid var(--primary);
+        }
+        textarea {
+            width: 100%; height: 80px; background: var(--bg); border: 1px solid var(--border);
+            color: white; border-radius: 8px; padding: 10px; margin: 10px 0;
+        }
+        .btn-save {
+            width: 100%; padding: 14px; background: var(--primary); color: white;
+            border: none; border-radius: 10px; font-weight: 900; cursor: pointer;
+        }
     </style>
 </head>
-<body data-theme="dark">
+<body>
+
+    <div class="day-bar" id="dayBar"></div>
+    <div id="scheduleList"></div>
+
+    <div id="noteModal" class="modal-backdrop hidden" onclick="if(event.target===this)closeModal()">
+        <div class="modal">
+            <h3 id="modalTitle" style="margin:0">Ders Notu</h3>
+            <label style="font-size:11px; color:var(--text-sub)">ÖDEV / NOT</label>
+            <textarea id="noteInput" placeholder="Bir şeyler yazın..."></textarea>
+            <button class="btn-save" onclick="saveNote()">KAYDET</button>
+        </div>
+    </div>
+
     <script>
-        // RenderHome fonksiyonunda nokta basan kısım şu şekilde güncellendi:
+        const gunList = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma"];
+        let currentDay = "Pazartesi";
+
+        // Örnek DB yapısı
+        let db = JSON.parse(localStorage.getItem('dersPlan_v1')) || {
+            schedule: [
+                { day: "Pazartesi", idx: 1, lesson: "MATEMATİK", class: "10/A" },
+                { day: "Pazartesi", idx: 2, lesson: "FİZİK", class: "10/A" },
+                { day: "Salı", idx: 1, lesson: "EDEBİYAT", class: "10/A" }
+            ],
+            annotations: {}
+        };
+
         function renderHome() {
             const list = document.getElementById('scheduleList');
-            const dayData = db.schedule.filter(s => s.day === currentActiveDay).sort((a,b) => a.idx - b.idx);
+            const bar = document.getElementById('dayBar');
             
-            // ... zaman hesaplama kısımları ...
+            // Günleri oluştur
+            bar.innerHTML = gunList.map(d => `
+                <div class="day-tab ${d === currentDay ? 'active' : ''}" onclick="setDay('${d}')">${d}</div>
+            `).join('');
 
-            let html = "";
-            dayData.forEach(s => {
+            const dayData = db.schedule.filter(s => s.day === currentDay);
+            
+            if(dayData.length === 0) {
+                list.innerHTML = `<p style="text-align:center; opacity:0.5">Bu gün için ders programı boş.</p>`;
+                return;
+            }
+
+            list.innerHTML = dayData.map(s => {
                 const key = `${s.day}-${s.idx}`;
-                const ann = db.annotations[key] || {};
-                
-                // Veri kontrolü (Ödev, Not veya Sınav var mı?)
-                const hasData = (ann.homework && ann.homework.trim()) || 
-                                (ann.note && ann.note.trim()) || 
-                                (ann.examDate && ann.examDate.trim());
+                const hasData = db.annotations[key] && db.annotations[key].trim().length > 0;
 
-                html += `
-                <div class="card lesson-card" onclick="openNoteModal('${s.day}', ${s.idx})">
+                return `
+                <div class="card" onclick="openModal('${s.day}', ${s.idx})">
                     <div class="lesson-row">
                         <div class="mini-indicator">
                             <div class="dot ${hasData ? 'on' : ''}"></div>
                         </div>
                         <div class="item-idx">${s.idx}</div>
-                        <div class="item-time">${/* zaman buraya */}</div>
                         <div class="item-class">${s.class}</div>
                         <div class="item-title">${s.lesson}</div>
                     </div>
-                </div>`;
-            });
-            list.innerHTML = html;
+                </div>
+                `;
+            }).join('');
         }
+
+        let activeKey = null;
+        function openModal(day, idx) {
+            activeKey = `${day}-${idx}`;
+            document.getElementById('modalTitle').innerText = idx + ". Ders Notları";
+            document.getElementById('noteInput').value = db.annotations[activeKey] || "";
+            document.getElementById('noteModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('noteModal').classList.add('hidden');
+        }
+
+        function saveNote() {
+            const val = document.getElementById('noteInput').value;
+            if(val.trim()) db.annotations[activeKey] = val;
+            else delete db.annotations[activeKey];
+            
+            localStorage.setItem('dersPlan_v1', JSON.stringify(db));
+            closeModal();
+            renderHome();
+        }
+
+        function setDay(d) {
+            currentDay = d;
+            renderHome();
+        }
+
+        window.onload = renderHome;
     </script>
 </body>
 </html>
